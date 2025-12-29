@@ -1,7 +1,7 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
-import ProductCard from '../components/ProductCard';
+import ProductCard from '../components/ProductCard.astro';
 import { products } from '../data/products';
 import { categories, testimonials } from '../data/shop-content';
 import NewsletterModal from '../components/NewsletterModal';
@@ -101,7 +101,7 @@ import FaqSection from '../components/FaqSection';
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
                     {products.map((product) => (
-                        <ProductCard product={product} client:load />
+                        <ProductCard product={product} />
                     ))}
                 </div>
                 
