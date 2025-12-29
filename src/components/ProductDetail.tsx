@@ -23,81 +23,123 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 		localStorage.setItem('cart', JSON.stringify(cart));
 		window.dispatchEvent(new Event('cartUpdated'));
 
-		// Show notification
-		const notification = document.createElement('div');
-		notification.className = 'fixed top-20 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-		notification.textContent = `${quantity} x ${product.name} zum Warenkorb hinzugefügt!`;
-		document.body.appendChild(notification);
-		setTimeout(() => notification.remove(), 3000);
+		// Show notification (simple alert for now or a toast)
+        const btn = document.getElementById('add-to-cart-btn');
+        if (btn) {
+            const originalText = btn.innerText;
+            btn.innerText = 'Hinzugefügt ✓';
+            btn.classList.add('bg-green-700', 'hover:bg-green-800');
+            setTimeout(() => {
+                btn.innerText = originalText;
+                btn.classList.remove('bg-green-700', 'hover:bg-green-800');
+            }, 2000);
+        }
 	};
 
 	return (
-		<div className="max-w-6xl mx-auto">
-			<a href="/" className="text-blue-600 hover:text-blue-700 mb-4 inline-block">
-				← Zurück zur Übersicht
-			</a>
-			<div className="grid md:grid-cols-2 gap-8 bg-white rounded-lg shadow-lg p-8">
-				<div>
-					<img
-						src={product.image}
-						alt={product.name}
-						className="w-full h-auto rounded-lg"
-					/>
-				</div>
-				<div>
-					<h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-					<div className="mb-4">
-						{product.rating && (
-							<div className="flex items-center gap-2 mb-2">
-								<span className="text-yellow-400">⭐</span>
-								<span className="font-semibold">{product.rating} / 5.0</span>
-							</div>
-						)}
-						<span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-							{product.category}
-						</span>
-					</div>
-					<p className="text-4xl font-bold text-blue-600 mb-6">
-						{product.price.toFixed(2)} €
-					</p>
-					<p className="text-gray-700 mb-6 leading-relaxed">
-						{product.description}
-					</p>
-					<div className="mb-6">
-						<label className="block text-sm font-medium mb-2">Menge:</label>
-						<div className="flex items-center gap-4">
-							<button
-								onClick={() => setQuantity(Math.max(1, quantity - 1))}
-								className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center hover:bg-gray-300"
-							>
-								-
-							</button>
-							<span className="text-xl font-semibold w-12 text-center">{quantity}</span>
-							<button
-								onClick={() => setQuantity(quantity + 1)}
-								className="w-10 h-10 bg-gray-200 rounded flex items-center justify-center hover:bg-gray-300"
-							>
-								+
-							</button>
-						</div>
-					</div>
-					<button
-						onClick={addToCart}
-						disabled={!product.inStock}
-						className={`w-full py-3 rounded-lg font-semibold text-lg transition-colors ${
-							product.inStock
-								? 'bg-blue-600 text-white hover:bg-blue-700'
-								: 'bg-gray-300 text-gray-500 cursor-not-allowed'
-						}`}
-					>
-						{product.inStock ? 'In den Warenkorb' : 'Ausverkauft'}
-					</button>
-					{product.inStock && (
-						<p className="text-green-600 mt-2 text-sm">✓ Auf Lager</p>
-					)}
+		<div className="grid md:grid-cols-2 gap-12 lg:gap-16">
+            {/* Gallery Section */}
+			<div className="space-y-4">
+                <div className="aspect-square bg-gray-100 rounded-sm overflow-hidden">
+				    <img
+					    src={product.image}
+					    alt={product.name}
+					    className="w-full h-full object-cover"
+				    />
+                </div>
+                <div className="grid grid-cols-4 gap-4">
+                    {/* Placeholder thumbnails */}
+                     <div className="aspect-square bg-gray-100 rounded-sm overflow-hidden cursor-pointer opacity-100 border-2 border-black">
+				        <img src={product.image} alt="" className="w-full h-full object-cover" />
+                     </div>
+                     <div className="aspect-square bg-gray-100 rounded-sm overflow-hidden cursor-pointer opacity-60 hover:opacity-100 transition-opacity">
+				        <img src={product.image} alt="" className="w-full h-full object-cover" />
+                     </div>
+                </div>
+			</div>
+
+            {/* Product Info Section */}
+			<div className="flex flex-col justify-start pt-4">
+                <div className="mb-2 text-sm text-gray-500 uppercase tracking-widest font-medium">
+                    {product.category}
+                </div>
+				<h1 className="text-4xl font-bold mb-4 text-gray-900 tracking-tight">{product.name}</h1>
+				
+                <div className="flex items-end gap-4 mb-8">
+				    <p className="text-2xl font-medium text-gray-900">
+					    {product.price.toFixed(2)} €
+				    </p>
+                    {product.rating && (
+                        <div className="flex items-center gap-1 mb-1 text-sm text-gray-600">
+                            <span className="text-yellow-400">★★★★★</span>
+                            <span className="ml-1">({product.rating} Bewertungen)</span>
+                        </div>
+                    )}
+                </div>
+
+                <div className="border-t border-b border-gray-100 py-6 mb-8">
+				    <p className="text-gray-600 leading-relaxed">
+					    {product.description}
+				    </p>
+                </div>
+
+				<div className="space-y-6">
+                    {/* Quantity & Add to Cart */}
+                    <div className="space-y-4">
+					    <label className="block text-xs font-bold uppercase tracking-wide text-gray-900">Menge</label>
+                        <div className="flex gap-4">
+                            <div className="flex items-center border border-gray-300 w-32 h-12">
+                                <button
+                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                    className="w-10 h-full flex items-center justify-center hover:bg-gray-50 text-gray-600"
+                                >
+                                    -
+                                </button>
+                                <input 
+                                    type="text" 
+                                    value={quantity} 
+                                    readOnly 
+                                    className="flex-1 w-full text-center font-medium border-none focus:ring-0 p-0"
+                                />
+                                <button
+                                    onClick={() => setQuantity(quantity + 1)}
+                                    className="w-10 h-full flex items-center justify-center hover:bg-gray-50 text-gray-600"
+                                >
+                                    +
+                                </button>
+                            </div>
+                            <button
+                                id="add-to-cart-btn"
+                                onClick={addToCart}
+                                disabled={!product.inStock}
+                                className={`flex-1 h-12 text-sm uppercase font-bold tracking-widest transition-colors ${
+                                    product.inStock
+                                        ? 'bg-black text-white hover:bg-gray-800'
+                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                }`}
+                            >
+                                {product.inStock ? 'In den Warenkorb' : 'Ausverkauft'}
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {/* Trust Badges */}
+                    <div className="grid grid-cols-2 gap-4 pt-6">
+                         <div className="flex items-center gap-3">
+                             <div className="bg-gray-100 p-2 rounded-full">
+                                <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" /></svg>
+                             </div>
+                             <span className="text-sm text-gray-600">Auf Lager & Lieferbar</span>
+                         </div>
+                         <div className="flex items-center gap-3">
+                             <div className="bg-gray-100 p-2 rounded-full">
+                                <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
+                             </div>
+                             <span className="text-sm text-gray-600">Kostenloser Versand</span>
+                         </div>
+                    </div>
 				</div>
 			</div>
 		</div>
 	);
 }
-

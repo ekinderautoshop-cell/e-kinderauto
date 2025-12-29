@@ -2,19 +2,41 @@
 import CartButton from './CartButton';
 ---
 
-<header class="bg-white shadow-md sticky top-0 z-50">
-	<nav class="container mx-auto px-4 py-4">
-		<div class="flex items-center justify-between">
-			<a href="/" class="text-2xl font-bold text-blue-600 hover:text-blue-700">
-				🚗 E-Kinderauto Shop
-			</a>
-			<div class="flex items-center gap-4">
-				<a href="/" class="text-gray-700 hover:text-blue-600 font-medium">
-					Produkte
-				</a>
-				<CartButton client:load />
-			</div>
+<header class="bg-white sticky top-0 z-50 border-b border-gray-100">
+	<nav class="container mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
+        <!-- Mobile Menu (Placeholder) -->
+        <button class="md:hidden p-2 -ml-2">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
+        </button>
+
+		<!-- Logo -->
+		<a href="/" class="text-2xl font-bold tracking-tighter uppercase">
+			KINDER<span class="font-light">AUTO</span>
+		</a>
+
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center gap-8 text-sm font-medium text-gray-600">
+            <a href="/" class="text-black hover:text-gray-600 transition-colors">Startseite</a>
+            <a href="#" class="hover:text-black transition-colors">Elektroautos</a>
+            <a href="#" class="hover:text-black transition-colors">Zubehör</a>
+            <a href="#" class="hover:text-black transition-colors">Sale</a>
+        </div>
+
+		<!-- Actions -->
+		<div class="flex items-center gap-4">
+            <button class="text-gray-600 hover:text-black transition-colors hidden sm:block">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+            </button>
+            <button class="text-gray-600 hover:text-black transition-colors hidden sm:block">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+                </svg>
+            </button>
+			<CartButton client:load />
 		</div>
 	</nav>
 </header>
-
