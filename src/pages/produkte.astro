@@ -1,0 +1,101 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import ProductCard from '../components/ProductCard';
+import NewsletterModal from '../components/NewsletterModal';
+import { products } from '../data/products';
+import { categories } from '../data/shop-content';
+
+// Get unique categories for filter
+const allCategories = ['Alle', ...new Set(products.map(p => p.category))];
+---
+
+<Layout title="Alle Produkte - E-Kinderauto">
+	<Header />
+    <NewsletterModal client:idle />
+	<main class="bg-white pb-20">
+        <!-- Header -->
+        <div class="bg-gray-50 py-12 md:py-20 mb-12 border-b border-gray-100">
+            <div class="container mx-auto px-6 md:px-12 text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Unsere Fahrzeuge</h1>
+                <p class="text-gray-500 max-w-2xl mx-auto text-lg">
+                    Entdecke die komplette Kollektion. Von sportlichen Flitzern bis zu robusten Geländewagen.
+                </p>
+            </div>
+        </div>
+
+        <div class="container mx-auto px-6 md:px-12">
+            <div class="flex flex-col lg:flex-row gap-12">
+                <!-- Sidebar / Filters -->
+                <aside class="w-full lg:w-64 flex-shrink-0 space-y-8">
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">Kategorien</h3>
+                        <ul class="space-y-2">
+                            {allCategories.map(cat => (
+                                <li>
+                                    <a href="#" class="text-gray-600 hover:text-black hover:underline decoration-1 underline-offset-4 transition-colors block py-1">
+                                        {cat}
+                                    </a>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="font-bold text-lg mb-4">Preis</h3>
+                        <div class="space-y-2">
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" class="rounded border-gray-300 text-black focus:ring-black" />
+                                <span class="text-gray-600 group-hover:text-black">Unter 200€</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" class="rounded border-gray-300 text-black focus:ring-black" />
+                                <span class="text-gray-600 group-hover:text-black">200€ - 300€</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer group">
+                                <input type="checkbox" class="rounded border-gray-300 text-black focus:ring-black" />
+                                <span class="text-gray-600 group-hover:text-black">Über 300€</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="p-6 bg-gray-50 rounded-lg border border-gray-100">
+                        <h4 class="font-bold mb-2">Hilfe benötigt?</h4>
+                        <p class="text-sm text-gray-500 mb-4">Unser Team hilft dir gerne bei der Auswahl des perfekten Fahrzeugs.</p>
+                        <a href="#" class="text-sm font-bold border-b border-black pb-1 hover:text-gray-600 hover:border-gray-600 transition-colors">
+                            Kontakt aufnehmen
+                        </a>
+                    </div>
+                </aside>
+
+                <!-- Product Grid -->
+                <div class="flex-1">
+                    {/* Sort & Count */}
+                    <div class="flex justify-between items-center mb-8 pb-4 border-b border-gray-100">
+                        <p class="text-sm text-gray-500">{products.length} Produkte</p>
+                        <select class="border-none bg-transparent text-sm font-medium focus:ring-0 cursor-pointer hover:text-gray-600 text-right pr-8">
+                            <option>Empfohlen</option>
+                            <option>Preis aufsteigend</option>
+                            <option>Preis absteigend</option>
+                            <option>Neuheiten</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+                        {products.map((product) => (
+                            <ProductCard product={product} client:load />
+                        ))}
+                    </div>
+
+                    {/* Pagination (Mock) */}
+                    <div class="mt-16 flex justify-center gap-2">
+                        <button class="w-10 h-10 flex items-center justify-center border border-black bg-black text-white font-medium rounded-sm">1</button>
+                        <button class="w-10 h-10 flex items-center justify-center border border-gray-200 text-gray-600 font-medium rounded-sm hover:border-black hover:text-black transition-colors">2</button>
+                        <button class="w-10 h-10 flex items-center justify-center border border-gray-200 text-gray-600 font-medium rounded-sm hover:border-black hover:text-black transition-colors">→</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+	</main>
+</Layout>
+
