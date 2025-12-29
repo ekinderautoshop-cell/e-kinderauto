@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Product } from '../types/product';
 
 interface ProductDetailProps {
@@ -7,6 +7,41 @@ interface ProductDetailProps {
 
 export default function ProductDetail({ product }: ProductDetailProps) {
 	const [quantity, setQuantity] = useState(1);
+    const [activeTab, setActiveTab] = useState('details');
+    const [timeLeft, setTimeLeft] = useState('');
+    const [viewers, setViewers] = useState(12);
+
+    // Countdown Timer Logic
+    useEffect(() => {
+        const updateTimer = () => {
+            const now = new Date();
+            const endOfDay = new Date();
+            endOfDay.setHours(14, 0, 0, 0); // Shipping deadline 14:00
+
+            if (now > endOfDay) {
+                endOfDay.setDate(endOfDay.getDate() + 1);
+            }
+
+            const diff = endOfDay.getTime() - now.getTime();
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const minutes = Math.floor((diff / (1000 * 60)) % 60);
+            
+            setTimeLeft(`${hours} Std. ${minutes} Min.`);
+        };
+        
+        updateTimer();
+        const interval = setInterval(updateTimer, 60000);
+        
+        // Random viewers fluctuation
+        const viewersInterval = setInterval(() => {
+            setViewers(prev => Math.max(5, Math.min(25, prev + Math.floor(Math.random() * 3) - 1)));
+        }, 5000);
+
+        return () => {
+            clearInterval(interval);
+            clearInterval(viewersInterval);
+        };
+    }, []);
 
 	const addToCart = () => {
 		const cart = JSON.parse(localStorage.getItem('cart') || '[]');
@@ -23,123 +58,211 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 		localStorage.setItem('cart', JSON.stringify(cart));
 		window.dispatchEvent(new Event('cartUpdated'));
 
-		// Show notification (simple alert for now or a toast)
+        // Feedback Animation
         const btn = document.getElementById('add-to-cart-btn');
-        if (btn) {
-            const originalText = btn.innerText;
-            btn.innerText = 'Hinzugefügt ✓';
-            btn.classList.add('bg-green-700', 'hover:bg-green-800');
-            setTimeout(() => {
-                btn.innerText = originalText;
-                btn.classList.remove('bg-green-700', 'hover:bg-green-800');
-            }, 2000);
-        }
+        const stickyBtn = document.getElementById('sticky-add-to-cart-btn');
+        
+        [btn, stickyBtn].forEach(b => {
+            if (b) {
+                const originalText = b.innerText;
+                b.innerText = 'Hinzugefügt ✓';
+                b.classList.add('bg-green-700', 'hover:bg-green-800');
+                setTimeout(() => {
+                    b.innerText = originalText;
+                    b.classList.remove('bg-green-700', 'hover:bg-green-800');
+                }, 2000);
+            }
+        });
 	};
 
 	return (
-		<div className="grid md:grid-cols-2 gap-12 lg:gap-16">
-            {/* Gallery Section */}
-			<div className="space-y-4">
-                <div className="aspect-square bg-gray-100 rounded-sm overflow-hidden">
-				    <img
-					    src={product.image}
-					    alt={product.name}
-					    className="w-full h-full object-cover"
-				    />
-                </div>
-                <div className="grid grid-cols-4 gap-4">
-                    {/* Placeholder thumbnails */}
-                     <div className="aspect-square bg-gray-100 rounded-sm overflow-hidden cursor-pointer opacity-100 border-2 border-black">
-				        <img src={product.image} alt="" className="w-full h-full object-cover" />
-                     </div>
-                     <div className="aspect-square bg-gray-100 rounded-sm overflow-hidden cursor-pointer opacity-60 hover:opacity-100 transition-opacity">
-				        <img src={product.image} alt="" className="w-full h-full object-cover" />
-                     </div>
-                </div>
-			</div>
-
-            {/* Product Info Section */}
-			<div className="flex flex-col justify-start pt-4">
-                <div className="mb-2 text-sm text-gray-500 uppercase tracking-widest font-medium">
-                    {product.category}
-                </div>
-				<h1 className="text-4xl font-bold mb-4 text-gray-900 tracking-tight">{product.name}</h1>
-				
-                <div className="flex items-end gap-4 mb-8">
-				    <p className="text-2xl font-medium text-gray-900">
-					    {product.price.toFixed(2)} €
-				    </p>
-                    {product.rating && (
-                        <div className="flex items-center gap-1 mb-1 text-sm text-gray-600">
-                            <span className="text-yellow-400">★★★★★</span>
-                            <span className="ml-1">({product.rating} Bewertungen)</span>
+		<div className="relative">
+            <div className="grid md:grid-cols-2 gap-12 lg:gap-16 pb-20">
+                {/* Gallery Section */}
+                <div className="space-y-4">
+                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative group">
+                        <img
+                            src={product.image}
+                            alt={product.name}
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        {/* Discount Badge */}
+                        <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
+                            -20% Sale
                         </div>
-                    )}
+                    </div>
+                    <div className="grid grid-cols-4 gap-4">
+                        {[0,1,2,3].map((i) => (
+                             <div key={i} className={`aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 ${i === 0 ? 'border-black' : 'border-transparent hover:border-gray-300'} transition-all`}>
+                                <img src={product.image} alt="" className="w-full h-full object-cover" />
+                             </div>
+                        ))}
+                    </div>
                 </div>
 
-                <div className="border-t border-b border-gray-100 py-6 mb-8">
-				    <p className="text-gray-600 leading-relaxed">
-					    {product.description}
-				    </p>
-                </div>
+                {/* Product Info Section */}
+                <div className="flex flex-col justify-start pt-2">
+                    {/* Breadcrumbs */}
+                    <nav className="flex text-xs text-gray-500 mb-4">
+                        <a href="/" className="hover:text-black">Home</a>
+                        <span className="mx-2">/</span>
+                        <span className="capitalize">{product.category}</span>
+                    </nav>
 
-				<div className="space-y-6">
-                    {/* Quantity & Add to Cart */}
-                    <div className="space-y-4">
-					    <label className="block text-xs font-bold uppercase tracking-wide text-gray-900">Menge</label>
-                        <div className="flex gap-4">
-                            <div className="flex items-center border border-gray-300 w-32 h-12">
+                    <h1 className="text-3xl md:text-4xl font-bold mb-2 text-gray-900 tracking-tight">{product.name}</h1>
+                    
+                    {/* Rating & Reviews */}
+                    <div className="flex items-center gap-2 mb-6">
+                        <div className="flex text-yellow-400 text-sm">
+                            ★★★★★
+                        </div>
+                        <span className="text-sm text-gray-500 underline decoration-gray-300 underline-offset-4 cursor-pointer hover:text-black">
+                            {product.rating || 124} Bewertungen lesen
+                        </span>
+                    </div>
+
+                    {/* Price */}
+                    <div className="flex items-end gap-3 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                        <p className="text-3xl font-bold text-gray-900">
+                            {product.price.toFixed(2)} €
+                        </p>
+                         <p className="text-lg text-gray-400 line-through mb-1">
+                            {(product.price * 1.2).toFixed(2)} €
+                        </p>
+                        <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded mb-1 ml-auto">
+                            Du sparst {(product.price * 0.2).toFixed(2)} €
+                        </span>
+                    </div>
+
+                    {/* Scarcity / Viewers */}
+                    <div className="flex items-center gap-2 text-sm text-orange-600 font-medium mb-6 animate-pulse">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                            <path fillRule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clipRule="evenodd" />
+                        </svg>
+                        {viewers} Personen schauen sich dieses Produkt gerade an
+                    </div>
+
+                    <div className="border-t border-gray-100 py-6 mb-6">
+                        <p className="text-gray-600 leading-relaxed text-sm md:text-base">
+                            {product.description}
+                        </p>
+                    </div>
+
+                    {/* Color/Variant Selection (Mock) */}
+                    <div className="mb-6">
+                        <span className="text-sm font-bold text-gray-900 mb-2 block">Farbe: <span className="font-normal text-gray-600">Rot</span></span>
+                        <div className="flex gap-2">
+                             <button className="w-8 h-8 rounded-full bg-red-600 ring-2 ring-offset-2 ring-black cursor-pointer"></button>
+                             <button className="w-8 h-8 rounded-full bg-black border border-gray-200 cursor-pointer hover:ring-2 ring-offset-2 ring-gray-300"></button>
+                             <button className="w-8 h-8 rounded-full bg-white border border-gray-200 cursor-pointer hover:ring-2 ring-offset-2 ring-gray-300"></button>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        {/* Quantity & Add to Cart */}
+                        <div className="space-y-4">
+                            <div className="flex gap-4">
+                                <div className="flex items-center border border-gray-300 w-32 h-12 rounded-lg">
+                                    <button
+                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                        className="w-10 h-full flex items-center justify-center hover:bg-gray-50 text-gray-600 rounded-l-lg"
+                                    >
+                                        -
+                                    </button>
+                                    <input 
+                                        type="text" 
+                                        value={quantity} 
+                                        readOnly 
+                                        className="flex-1 w-full text-center font-medium border-none focus:ring-0 p-0 bg-transparent"
+                                    />
+                                    <button
+                                        onClick={() => setQuantity(quantity + 1)}
+                                        className="w-10 h-full flex items-center justify-center hover:bg-gray-50 text-gray-600 rounded-r-lg"
+                                    >
+                                        +
+                                    </button>
+                                </div>
                                 <button
-                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                    className="w-10 h-full flex items-center justify-center hover:bg-gray-50 text-gray-600"
+                                    id="add-to-cart-btn"
+                                    onClick={addToCart}
+                                    disabled={!product.inStock}
+                                    className={`flex-1 h-12 text-sm uppercase font-bold tracking-widest transition-all rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
+                                        product.inStock
+                                            ? 'bg-black text-white hover:bg-gray-800'
+                                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                                    }`}
                                 >
-                                    -
-                                </button>
-                                <input 
-                                    type="text" 
-                                    value={quantity} 
-                                    readOnly 
-                                    className="flex-1 w-full text-center font-medium border-none focus:ring-0 p-0"
-                                />
-                                <button
-                                    onClick={() => setQuantity(quantity + 1)}
-                                    className="w-10 h-full flex items-center justify-center hover:bg-gray-50 text-gray-600"
-                                >
-                                    +
+                                    {product.inStock ? 'In den Warenkorb' : 'Ausverkauft'}
                                 </button>
                             </div>
-                            <button
-                                id="add-to-cart-btn"
-                                onClick={addToCart}
-                                disabled={!product.inStock}
-                                className={`flex-1 h-12 text-sm uppercase font-bold tracking-widest transition-colors ${
-                                    product.inStock
-                                        ? 'bg-black text-white hover:bg-gray-800'
-                                        : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                                }`}
-                            >
-                                {product.inStock ? 'In den Warenkorb' : 'Ausverkauft'}
-                            </button>
+                            
+                            {/* Shipping Timer */}
+                            <div className="bg-blue-50 text-blue-800 text-xs px-4 py-3 rounded-lg flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                                    <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clipRule="evenodd" />
+                                </svg>
+                                <span>Bestelle innerhalb von <b>{timeLeft}</b> für Versand <b>HEUTE</b></span>
+                            </div>
+                        </div>
+                        
+                        {/* Accordion / Tabs */}
+                        <div className="border rounded-lg overflow-hidden mt-8">
+                             <div className="flex border-b bg-gray-50">
+                                 <button 
+                                    onClick={() => setActiveTab('details')}
+                                    className={`flex-1 py-3 text-sm font-medium ${activeTab === 'details' ? 'bg-white border-b-2 border-black text-black' : 'text-gray-500 hover:text-gray-700'}`}
+                                 >
+                                     Details
+                                 </button>
+                                 <button 
+                                    onClick={() => setActiveTab('shipping')}
+                                    className={`flex-1 py-3 text-sm font-medium ${activeTab === 'shipping' ? 'bg-white border-b-2 border-black text-black' : 'text-gray-500 hover:text-gray-700'}`}
+                                 >
+                                     Versand
+                                 </button>
+                             </div>
+                             <div className="p-4 text-sm text-gray-600 leading-relaxed min-h-[150px]">
+                                {activeTab === 'details' ? (
+                                    <ul className="list-disc pl-4 space-y-1">
+                                        <li>Altersempfehlung: 3-6 Jahre</li>
+                                        <li>Geschwindigkeit: 3-6 km/h</li>
+                                        <li>Akku: 12V 7Ah (inklusive)</li>
+                                        <li>Max. Zuladung: 30kg</li>
+                                        <li>Features: LED-Licht, MP3-Player, Soft-Start</li>
+                                    </ul>
+                                ) : (
+                                    <div>
+                                        <p className="mb-2">Kostenloser Versand mit DHL/DPD.</p>
+                                        <p>Lieferzeit: 1-3 Werktage innerhalb Deutschlands.</p>
+                                        <p className="mt-2">30 Tage Rückgaberecht. Kostenloser Rückversand.</p>
+                                    </div>
+                                )}
+                             </div>
                         </div>
                     </div>
-                    
-                    {/* Trust Badges */}
-                    <div className="grid grid-cols-2 gap-4 pt-6">
-                         <div className="flex items-center gap-3">
-                             <div className="bg-gray-100 p-2 rounded-full">
-                                <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" /></svg>
-                             </div>
-                             <span className="text-sm text-gray-600">Auf Lager & Lieferbar</span>
-                         </div>
-                         <div className="flex items-center gap-3">
-                             <div className="bg-gray-100 p-2 rounded-full">
-                                <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
-                             </div>
-                             <span className="text-sm text-gray-600">Kostenloser Versand</span>
-                         </div>
-                    </div>
-				</div>
-			</div>
-		</div>
+                </div>
+            </div>
+
+            {/* Sticky Mobile Add to Cart */}
+            <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-2xl md:hidden z-40 flex items-center gap-4 animate-slide-up">
+                 <div className="hidden sm:block">
+                     <p className="font-bold text-sm truncate max-w-[150px]">{product.name}</p>
+                     <p className="text-sm font-medium">{product.price.toFixed(2)} €</p>
+                 </div>
+                 <button
+                    id="sticky-add-to-cart-btn"
+                    onClick={addToCart}
+                    disabled={!product.inStock}
+                    className={`flex-1 h-12 text-sm uppercase font-bold tracking-widest rounded-lg ${
+                        product.inStock
+                            ? 'bg-black text-white hover:bg-gray-800'
+                            : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                    }`}
+                >
+                    In den Warenkorb
+                </button>
+            </div>
+        </div>
 	);
 }
