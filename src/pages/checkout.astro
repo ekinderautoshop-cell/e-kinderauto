@@ -1,0 +1,14 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import CheckoutForm from '../components/CheckoutForm';
+---
+
+<Layout title="Kasse - E-Kinderauto Shop">
+	<Header />
+	<main class="container mx-auto px-4 py-8">
+		<h1 class="text-3xl font-bold mb-8">Kasse</h1>
+		<CheckoutForm client:load />
+	</main>
+</Layout>
+

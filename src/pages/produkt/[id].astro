@@ -1,0 +1,23 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import ProductDetail from '../../components/ProductDetail';
+import { products } from '../../data/products';
+
+export function getStaticPaths() {
+	return products.map((product) => ({
+		params: { id: product.id },
+		props: { product },
+	}));
+}
+
+const { product } = Astro.props;
+---
+
+<Layout title={`${product.name} - E-Kinderauto Shop`}>
+	<Header />
+	<main class="container mx-auto px-4 py-8">
+		<ProductDetail product={product} client:load />
+	</main>
+</Layout>
+

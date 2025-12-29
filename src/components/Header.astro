@@ -1,0 +1,20 @@
+---
+import CartButton from './CartButton';
+---
+
+<header class="bg-white shadow-md sticky top-0 z-50">
+	<nav class="container mx-auto px-4 py-4">
+		<div class="flex items-center justify-between">
+			<a href="/" class="text-2xl font-bold text-blue-600 hover:text-blue-700">
+				🚗 E-Kinderauto Shop
+			</a>
+			<div class="flex items-center gap-4">
+				<a href="/" class="text-gray-700 hover:text-blue-600 font-medium">
+					Produkte
+				</a>
+				<CartButton client:load />
+			</div>
+		</div>
+	</nav>
+</header>
+
