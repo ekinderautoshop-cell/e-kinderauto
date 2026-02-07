@@ -192,6 +192,11 @@ export function isShortNameSingleWord(fullName: string): boolean {
 	return short.length > 0 && short.split(/\s+/).length <= 1;
 }
 
+/** True, wenn der Produktname "ersatzteil" oder "ersatzteile" enthält (nicht anzeigen). */
+export function isErsatzteilProduct(name: string): boolean {
+	return /ersatzteil/i.test(name ?? '');
+}
+
 /**
  * Gruppiert Produkte nach Basis-SKU (ein Eintrag pro Modell, Varianten zusammengefasst).
  * Gibt ein Repräsentanten-Produkt pro Gruppe zurück (Basis-SKU bevorzugt, sonst erste Variante).
