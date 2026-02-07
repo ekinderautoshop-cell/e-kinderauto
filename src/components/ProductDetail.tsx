@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Product } from '../types/product';
 import { getBaseSku, getShortProductName, formatShippingTime } from '../lib/d1-products';
+import { getCategoryDisplayName, stripMitLizenz } from '../data/shop-content';
 
 interface ProductDetailProps {
 	product: Product;
@@ -17,7 +18,7 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
 	const [selectedVariant, setSelectedVariant] = useState<Product>(product);
 	const [scrolledPastHero, setScrolledPastHero] = useState(false);
 	const displayProduct = variants && variants.length > 1 ? selectedVariant : product;
-	const displayName = getShortProductName(displayProduct.name, 60);
+	const displayName = getShortProductName(stripMitLizenz(displayProduct.name), 60);
 	// Galerie: immer Hauptbild zuerst, dann restliche Bilder der Variante; falls nur ein Bild, Basis-Galerie als Fallback
 	const variantImages = displayProduct.images?.length
 		? displayProduct.images
@@ -213,7 +214,7 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
                         <nav className="flex text-xs text-gray-500 mb-4">
                             <a href="/" className="hover:text-black">Home</a>
                             <span className="mx-2">/</span>
-                            <span className="capitalize">{displayProduct.category}</span>
+                            <span className="capitalize">{getCategoryDisplayName(displayProduct.category)}</span>
                         </nav>
 
                         <h1 className="text-3xl md:text-4xl font-bold mb-2 text-gray-900 tracking-tight">{displayName}</h1>
@@ -298,7 +299,7 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
 
                             {colorVariantsOnly.length > 0 && (
                                 <div>
-                                    <span className="text-sm font-bold text-gray-900 mb-2 block">Farbe: <span className="font-normal text-gray-600">{displayProduct.color ?? displayProduct.name.split(' - ').pop()}</span></span>
+                                    <span className="text-sm font-bold text-gray-900 mb-2 block">Farbe: <span className="font-normal text-gray-600">{stripMitLizenz(displayProduct.color ?? displayProduct.name.split(' - ').pop() ?? '')}</span></span>
                                     <div className="flex flex-wrap gap-2">
                                         {colorVariantsOnly.map((v) => (
                                             <button

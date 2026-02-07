@@ -24,6 +24,16 @@ export const categoryOrder: { name: string; slug: string }[] = ALLOWED_CATEGORY_
     slug: categoryToSlug(name),
 }));
 
+/** Entfernt „(mit Lizenz)“ / „(mit lizens)“ usw. überall – Kategorien, Produktnamen, nirgends sichtbar. */
+export function stripMitLizenz(text: string): string {
+    return text.replace(/\s*\(mit\s+lizen(s|z)?\)\s*/gi, ' ').trim().replace(/\s+/g, ' ');
+}
+
+/** Anzeigename für Kategorien (nutzt stripMitLizenz). */
+export function getCategoryDisplayName(name: string): string {
+    return stripMitLizenz(name);
+}
+
 /** Slug aus Kategoriename (für URL-Filter). */
 export function categoryToSlug(name: string): string {
     return name

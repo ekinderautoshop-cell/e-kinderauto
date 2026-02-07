@@ -1,13 +1,14 @@
 ---
 import type { Product } from '../types/product';
 import { getShortProductName, formatShippingTime } from '../lib/d1-products';
+import { stripMitLizenz } from '../data/shop-content';
 
 interface Props {
 	product: Product;
 }
 
 const { product } = Astro.props;
-const displayName = getShortProductName(product.name);
+const displayName = getShortProductName(stripMitLizenz(product.name));
 const lieferzeit = formatShippingTime(product.shippingTime);
 ---
 

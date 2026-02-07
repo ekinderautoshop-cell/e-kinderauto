@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import type { Product } from '../types/product';
 import { getShortProductName } from '../lib/d1-products';
+import { getCategoryDisplayName, stripMitLizenz } from '../data/shop-content';
 
 interface CartItem {
 	product: Product;
@@ -155,7 +156,7 @@ export default function CartButton() {
 										<div className="flex-1 flex flex-col justify-between py-1">
 											<div>
                                                 <div className="flex justify-between items-start">
-												    <h3 className="font-bold text-sm text-gray-900 line-clamp-2">{getShortProductName(item.product.name)}</h3>
+												    <h3 className="font-bold text-sm text-gray-900 line-clamp-2">{getShortProductName(stripMitLizenz(item.product.name))}</h3>
                                                     <button
 														onClick={() => removeFromCart(item.product.id)}
 														className="text-gray-400 hover:text-red-500 transition-colors ml-2"
@@ -165,7 +166,7 @@ export default function CartButton() {
                                                         </svg>
 													</button>
                                                 </div>
-												<p className="text-gray-500 text-xs mt-1">{item.product.category}</p>
+												<p className="text-gray-500 text-xs mt-1">{getCategoryDisplayName(item.product.category)}</p>
 											</div>
 											<div className="flex items-center justify-between mt-2">
 												<div className="flex items-center border border-gray-200 rounded-lg h-8">

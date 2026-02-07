@@ -7,7 +7,7 @@ import ProductCard from '../components/ProductCard.astro';
 import NewsletterModal from '../components/NewsletterModal';
 import { products as staticProducts } from '../data/products';
 import { getProductsFromD1 } from '../lib/d1-products';
-import { categoryOrder, categoryToSlug, ALLOWED_CATEGORY_NAMES } from '../data/shop-content';
+import { categoryOrder, categoryToSlug, ALLOWED_CATEGORY_NAMES, getCategoryDisplayName } from '../data/shop-content';
 import { groupProductsByBase, isShortNameSingleWord, isErsatzteilProduct, isZusatzartikelProduct } from '../lib/d1-products';
 
 const db = Astro.locals.runtime?.env?.DB as import('../lib/d1-products').D1Database | undefined;
@@ -39,7 +39,7 @@ const sortedCategories = productCategoryNames.sort((a, b) => {
 });
 ---
 
-<Layout title={kategorieParam ? `${sortedCategories.find(c => categoryToSlug(c) === kategorieParam) ?? 'Produkte'} - E-Kinderauto` : 'Alle Produkte - E-Kinderauto'}>
+<Layout title={kategorieParam ? `${getCategoryDisplayName(sortedCategories.find(c => categoryToSlug(c) === kategorieParam) ?? '') || 'Produkte'} - E-Kinderauto` : 'Alle Produkte - E-Kinderauto'}>
 	<Header />
     <NewsletterModal client:idle />
 	<main class="bg-white pb-20">
@@ -71,7 +71,7 @@ const sortedCategories = productCategoryNames.sort((a, b) => {
                                 return (
                                     <li>
                                         <a href={`/produkte?kategorie=${encodeURIComponent(slug)}`} class={`block py-1 ${isActive ? 'font-semibold text-black' : 'text-gray-600 hover:text-black'} hover:underline decoration-1 underline-offset-4 transition-colors`}>
-                                            {cat}
+                                            {getCategoryDisplayName(cat)}
                                         </a>
                                     </li>
                                 );

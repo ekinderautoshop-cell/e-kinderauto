@@ -5,6 +5,7 @@ import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import ProductDetail from '../../components/ProductDetail';
 import { getProductVariantsByBaseSku, getBaseSku, getShortProductName } from '../../lib/d1-products';
+import { stripMitLizenz } from '../../data/shop-content';
 import { products as staticProducts } from '../../data/products';
 
 const sku = Astro.params.id;
@@ -26,7 +27,7 @@ if (variants.length === 0) return Astro.redirect('/produkte');
 const product = variants.find((v) => v.id === sku) ?? variants[0]!;
 ---
 
-<Layout title={`${getShortProductName(product.name)} - E-Kinderauto Shop`}>
+<Layout title={`${getShortProductName(stripMitLizenz(product.name))} - E-Kinderauto Shop`}>
 	<Header />
 	<main class="container mx-auto px-4 py-8">
 		<ProductDetail product={product} variants={variants.length > 1 ? variants : undefined} client:load />
