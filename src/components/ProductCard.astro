@@ -1,6 +1,7 @@
 ---
 import type { Product } from '../types/product';
 import { getShortProductName, formatShippingTime } from '../lib/d1-products';
+import { getCategoryImageUrl } from '../data/shop-content';
 
 interface Props {
 	product: Product;
@@ -9,9 +10,16 @@ interface Props {
 const { product } = Astro.props;
 const displayName = getShortProductName(product.name);
 const lieferzeit = formatShippingTime(product.shippingTime);
+const categoryBgImage = getCategoryImageUrl(product.category);
 ---
 
-<div class="group {!product.inStock ? 'opacity-75' : ''}">
+<div class="group relative overflow-hidden rounded-sm {!product.inStock ? 'opacity-75' : ''}">
+    {/* Kategorie-Hintergrundbild hinter der Karte */}
+    <div
+        class="absolute inset-0 bg-cover bg-center scale-105 opacity-[0.12] pointer-events-none"
+        style={`background-image: url(${categoryBgImage});`}
+        aria-hidden="true"
+    />
     {/* Image Container */}
     <div class="relative aspect-[4/3] bg-gray-100 mb-4 overflow-hidden rounded-sm {!product.inStock ? 'grayscale' : ''}">
         <a href={`/produkt/${product.id}`} class="block w-full h-full">

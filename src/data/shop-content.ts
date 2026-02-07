@@ -81,6 +81,12 @@ const categoryImageBySlug: Record<string, string> = {
 
 const DEFAULT_CATEGORY_IMAGE = 'https://images.unsplash.com/photo-1532906619279-a764d0263f4e?q=80&w=800&auto=format&fit=crop';
 
+/** Bild-URL für eine Kategorie (z. B. für Hintergrund hinter Produktkarten). */
+export function getCategoryImageUrl(categoryName: string): string {
+    const slug = categoryToSlug(categoryName);
+    return categoryImageBySlug[slug] ?? DEFAULT_CATEGORY_IMAGE;
+}
+
 /** Alle Kategorien mit Bild für die Kategorien-Unterseite. */
 export const categoriesWithImages = categoryOrder.map((c) => ({
     name: c.name,
