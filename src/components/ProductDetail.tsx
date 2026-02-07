@@ -17,8 +17,24 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
 	const [selectedVariant, setSelectedVariant] = useState<Product>(product);
 	const displayProduct = variants && variants.length > 1 ? selectedVariant : product;
 	const displayName = getShortProductName(displayProduct.name, 60);
-	const displayImages = displayProduct.images?.length ? displayProduct.images : [displayProduct.image];
-	const mainImageUrl = displayImages[selectedImageIndex] ?? displayProduct.image;
+	// Galerie: immer Hauptbild zuerst, dann restliche Bilder der Variante; falls nur ein Bild, Basis-Galerie als Fallback
+	const variantImages = displayProduct.images?.length
+		? displayProduct.images
+		: displayProduct.image
+			? [displayProduct.image]
+			: [];
+	const hasMultipleVariantImages = variantImages.length > 1;
+	const baseImages = product.images?.length ? product.images : product.image ? [product.image] : [];
+	const displayImages =
+		hasMultipleVariantImages
+			? variantImages
+			: displayProduct.image
+				? [
+						displayProduct.image,
+						...(baseImages.filter((url) => url !== displayProduct.image)),
+					]
+				: baseImages;
+	const mainImageUrl = displayImages[selectedImageIndex] ?? displayProduct.image ?? product.image;
 
 	const baseSku = variants?.length ? getBaseSku(variants[0]!) : product.id;
 	const colorVariantsOnly = variants?.filter((v) => v.id !== baseSku) ?? [];
