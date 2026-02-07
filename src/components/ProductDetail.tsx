@@ -15,6 +15,7 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
 	const [viewers, setViewers] = useState(12);
 	const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 	const [selectedVariant, setSelectedVariant] = useState<Product>(product);
+	const [scrolledPastHero, setScrolledPastHero] = useState(false);
 	const displayProduct = variants && variants.length > 1 ? selectedVariant : product;
 	const displayName = getShortProductName(displayProduct.name, 60);
 	// Galerie: immer Hauptbild zuerst, dann restliche Bilder der Variante; falls nur ein Bild, Basis-Galerie als Fallback
@@ -82,6 +83,17 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
         setSelectedImageIndex(0);
     }, [product.id]);
 
+	// Beim Runterscrollen Hero + Schwebe-Kästchen ausblenden
+	useEffect(() => {
+		const onScroll = () => {
+			const threshold = typeof window !== 'undefined' ? window.innerHeight * 0.85 : 800;
+			setScrolledPastHero(typeof window !== 'undefined' ? window.scrollY > threshold : false);
+		};
+		onScroll();
+		window.addEventListener('scroll', onScroll, { passive: true });
+		return () => window.removeEventListener('scroll', onScroll);
+	}, []);
+
 	const addToCart = () => {
 		const cart = JSON.parse(localStorage.getItem('cart') || '[]');
 		const existingItem = cart.find((item: { product: Product; quantity: number }) => 
@@ -116,29 +128,29 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
 
 	return (
 		<div className="relative">
-            {/* Hero: breites Produktbild oben */}
-            <section className="w-full -mx-4 sm:mx-0 sm:rounded-xl overflow-hidden mb-8 md:mb-12">
-                <div className="aspect-[16/10] md:aspect-[21/9] bg-gray-100 relative group">
+            {/* Hero: volle Bildschirmhöhe, Bild bedeckt alles */}
+            <section className="relative w-full min-h-screen -mx-4 sm:mx-0 overflow-hidden mb-0">
+                <div className="absolute inset-0 bg-gray-100">
                     <img
                         src={mainImageUrl}
                         alt={displayName}
                         className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
                     />
-                    {displayProduct.price > 0 && displayProduct.inStock && (
-                        <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
-                            -20% Sale
-                        </div>
-                    )}
                 </div>
+                {displayProduct.price > 0 && displayProduct.inStock && (
+                    <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm z-10">
+                        -20% Sale
+                    </div>
+                )}
                 {displayImages.length > 1 && (
-                    <div className="container mx-auto px-4 mt-4">
-                        <div className="flex gap-3 overflow-x-auto pb-2">
+                    <div className="absolute bottom-4 left-0 right-0 z-10 px-4">
+                        <div className="flex gap-3 overflow-x-auto pb-2 justify-center">
                             {displayImages.slice(0, 8).map((src, i) => (
                                 <button
                                     key={i}
                                     type="button"
                                     onClick={() => setSelectedImageIndex(i)}
-                                    className={`flex-shrink-0 w-20 h-20 md:w-24 md:h-24 bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${selectedImageIndex === i ? 'border-black ring-1 ring-black' : 'border-transparent hover:border-gray-300'}`}
+                                    className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 bg-white/90 backdrop-blur rounded-lg overflow-hidden cursor-pointer border-2 transition-all shadow ${selectedImageIndex === i ? 'border-black ring-1 ring-black' : 'border-white hover:border-gray-300'}`}
                                 >
                                     <img src={src} alt="" className="w-full h-full object-cover" />
                                 </button>
@@ -146,10 +158,55 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
                         </div>
                     </div>
                 )}
+
+                {/* Schwebe-Kästchen Direkt kaufen (nur Desktop, verschwindet beim Runterscrollen) */}
+                <div
+                    className={`hidden lg:block fixed right-6 top-1/2 -translate-y-1/2 z-20 w-80 bg-white rounded-xl shadow-2xl border border-gray-100 p-5 transition-all duration-300 ${
+                        scrolledPastHero ? 'opacity-0 pointer-events-none translate-x-4' : 'opacity-100'
+                    }`}
+                >
+                    <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-2">Direkt kaufen</p>
+                    <p className="text-2xl font-bold text-gray-900 mb-3">{displayProduct.price.toFixed(2)} €</p>
+                    {colorVariantsOnly.length > 0 && (
+                        <div className="mb-3">
+                            <span className="text-xs font-bold text-gray-700 block mb-1">Farbe</span>
+                            <div className="flex flex-wrap gap-1">
+                                {colorVariantsOnly.slice(0, 4).map((v) => (
+                                    <button
+                                        key={v.id}
+                                        type="button"
+                                        onClick={() => handleVariantSelect(v)}
+                                        className={`px-2 py-1 rounded text-xs font-medium border transition-all ${selectedVariant.id === v.id ? 'border-black bg-black text-white' : 'border-gray-200 hover:border-gray-400'}`}
+                                    >
+                                        {(v.color ?? v.id.split('-').slice(1).join('-')) || v.id}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    <div className="flex gap-2 mb-3">
+                        <div className="flex items-center border border-gray-300 w-24 h-10 rounded-lg flex-shrink-0">
+                            <button type="button" onClick={() => setQuantity(Math.max(1, quantity - 1))} className="w-8 h-full flex items-center justify-center hover:bg-gray-50 text-gray-600 rounded-l-lg">−</button>
+                            <span className="flex-1 text-center text-sm font-medium">{quantity}</span>
+                            <button type="button" onClick={() => setQuantity(quantity + 1)} className="w-8 h-full flex items-center justify-center hover:bg-gray-50 text-gray-600 rounded-r-lg">+</button>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={addToCart}
+                            disabled={!displayProduct.inStock}
+                            className={`flex-1 h-10 text-xs uppercase font-bold tracking-widest rounded-lg ${
+                                displayProduct.inStock ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                            }`}
+                        >
+                            {displayProduct.inStock ? 'In den Warenkorb' : 'Ausverkauft'}
+                        </button>
+                    </div>
+                    <p className="text-xs text-gray-500">Kostenloser Versand ab 50 €</p>
+                </div>
             </section>
 
-            {/* Zwei Spalten: Links Beschreibung, rechts Kaufbereich */}
-            <div className="max-w-6xl mx-auto px-4 pb-24 md:pb-20">
+            {/* Zwei Spalten: erscheinen beim Runterscrollen */}
+            <div className="max-w-6xl mx-auto px-4 pt-10 md:pt-12 pb-24 md:pb-20">
                 <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-12">
                     {/* Links: Beschreibung, Titel, Bewertung, Text, Details/Versand-Tabs */}
                     <div className="lg:col-span-3 order-2 lg:order-1">
