@@ -132,96 +132,132 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
                 )}
             </section>
 
-            {/* Produktinfos und Bestellung darunter */}
-            <div className="max-w-2xl mx-auto px-4 pb-24 md:pb-20">
-                <div className="flex flex-col">
-                    {/* Breadcrumbs */}
-                    <nav className="flex text-xs text-gray-500 mb-4">
-                        <a href="/" className="hover:text-black">Home</a>
-                        <span className="mx-2">/</span>
-                        <span className="capitalize">{displayProduct.category}</span>
-                    </nav>
+            {/* Zwei Spalten: Links Beschreibung, rechts Kaufbereich */}
+            <div className="max-w-6xl mx-auto px-4 pb-24 md:pb-20">
+                <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 lg:gap-12">
+                    {/* Links: Beschreibung, Titel, Bewertung, Text, Details/Versand-Tabs */}
+                    <div className="lg:col-span-3 order-2 lg:order-1">
+                        <nav className="flex text-xs text-gray-500 mb-4">
+                            <a href="/" className="hover:text-black">Home</a>
+                            <span className="mx-2">/</span>
+                            <span className="capitalize">{displayProduct.category}</span>
+                        </nav>
 
-                    <h1 className="text-3xl md:text-4xl font-bold mb-2 text-gray-900 tracking-tight">{displayName}</h1>
-                    
-                    {/* Rating & Reviews */}
-                    <div className="flex items-center gap-2 mb-6">
-                        <div className="flex text-yellow-400 text-sm">
-                            ★★★★★
+                        <h1 className="text-3xl md:text-4xl font-bold mb-2 text-gray-900 tracking-tight">{displayName}</h1>
+
+                        <div className="flex items-center gap-2 mb-6">
+                            <div className="flex text-yellow-400 text-sm">★★★★★</div>
+                            <span className="text-sm text-gray-500 underline decoration-gray-300 underline-offset-4 cursor-pointer hover:text-black">
+                                {product.rating || 124} Bewertungen lesen
+                            </span>
                         </div>
-                        <span className="text-sm text-gray-500 underline decoration-gray-300 underline-offset-4 cursor-pointer hover:text-black">
-                            {product.rating || 124} Bewertungen lesen
-                        </span>
-                    </div>
 
-                    {/* Price */}
-                    <div className="flex items-end gap-3 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
-                        <p className="text-3xl font-bold text-gray-900">
-                            {displayProduct.price.toFixed(2)} €
-                        </p>
-                         <p className="text-lg text-gray-400 line-through mb-1">
-                            {(displayProduct.price * 1.2).toFixed(2)} €
-                        </p>
-                        <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded mb-1 ml-auto">
-                            Du sparst {(displayProduct.price * 0.2).toFixed(2)} €
-                        </span>
-                    </div>
+                        <div className="border-t border-gray-100 pt-6 pb-6">
+                            <div
+                                className="product-description text-gray-600 leading-relaxed text-sm md:text-base"
+                                dangerouslySetInnerHTML={{ __html: displayProduct.description || '' }}
+                            />
+                        </div>
 
-                    {/* Scarcity / Viewers */}
-                    <div className="flex items-center gap-2 text-sm text-orange-600 font-medium mb-6 animate-pulse">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-                            <path fillRule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clipRule="evenodd" />
-                        </svg>
-                        {viewers} Personen schauen sich dieses Produkt gerade an
-                    </div>
-
-                    <div className="border-t border-gray-100 py-6 mb-6">
-                        <div
-                            className="product-description text-gray-600 leading-relaxed text-sm md:text-base"
-                            dangerouslySetInnerHTML={{ __html: displayProduct.description || '' }}
-                        />
-                    </div>
-
-                    {/* Nur echte Farbvarianten (ohne Standardprodukt/Basis-SKU) */}
-                    {colorVariantsOnly.length > 0 && (
-                        <div className="mb-6">
-                            <span className="text-sm font-bold text-gray-900 mb-2 block">Farbe: <span className="font-normal text-gray-600">{displayProduct.color ?? displayProduct.name.split(' - ').pop()}</span></span>
-                            <div className="flex flex-wrap gap-2">
-                                {colorVariantsOnly.map((v) => (
-                                    <button
-                                        key={v.id}
-                                        type="button"
-                                        onClick={() => handleVariantSelect(v)}
-                                        className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${selectedVariant.id === v.id ? 'border-black bg-black text-white' : 'border-gray-200 hover:border-gray-400 text-gray-700'}`}
-                                    >
-                                        {(v.color ?? v.id.split('-').slice(1).join('-')) || v.id}
-                                    </button>
-                                ))}
+                        <div className="border rounded-lg overflow-hidden">
+                            <div className="flex border-b bg-gray-50">
+                                <button
+                                    onClick={() => setActiveTab('details')}
+                                    className={`flex-1 py-3 text-sm font-medium ${activeTab === 'details' ? 'bg-white border-b-2 border-black text-black' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    Details
+                                </button>
+                                <button
+                                    onClick={() => setActiveTab('shipping')}
+                                    className={`flex-1 py-3 text-sm font-medium ${activeTab === 'shipping' ? 'bg-white border-b-2 border-black text-black' : 'text-gray-500 hover:text-gray-700'}`}
+                                >
+                                    Versand
+                                </button>
+                            </div>
+                            <div className="p-4 text-sm text-gray-600 leading-relaxed min-h-[120px]">
+                                {activeTab === 'details' ? (
+                                    <ul className="list-disc pl-4 space-y-1">
+                                        <li>Altersempfehlung: 3-6 Jahre</li>
+                                        <li>Geschwindigkeit: 3-6 km/h</li>
+                                        <li>Akku: 12V 7Ah (inklusive)</li>
+                                        <li>Max. Zuladung: 30kg</li>
+                                        <li>Features: LED-Licht, MP3-Player, Soft-Start</li>
+                                    </ul>
+                                ) : (
+                                    <div>
+                                        <p className="mb-2">
+                                            <strong>Lieferzeit:</strong> {formatShippingTime(displayProduct.shippingTime)} (innerhalb Deutschlands).
+                                        </p>
+                                        <p className="mb-2">
+                                            {displayProduct.shippingCost != null && displayProduct.shippingCost > 0
+                                                ? `Versandkosten: ${displayProduct.shippingCost.toFixed(2)} €`
+                                                : 'Kostenloser Versand mit DHL/DPD ab 50 € Bestellwert.'}
+                                        </p>
+                                        <p className="mt-2">30 Tage Rückgaberecht. Kostenloser Rückversand.</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
-                    )}
-                    {!variants?.length && displayProduct.color && (
-                        <div className="mb-6">
-                            <span className="text-sm font-bold text-gray-900 mb-2 block">Farbe: <span className="font-normal text-gray-600">{displayProduct.color}</span></span>
-                        </div>
-                    )}
+                    </div>
 
-                    <div className="space-y-6">
-                        {/* Quantity & Add to Cart */}
-                        <div className="space-y-4">
+                    {/* Rechts: Kaufbereich (Preis, Farbe, Menge, Warenkorb) */}
+                    <div className="lg:col-span-2 order-1 lg:order-2">
+                        <div className="lg:sticky lg:top-24 space-y-6">
+                            <div className="flex flex-wrap items-end gap-3 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                <p className="text-3xl font-bold text-gray-900">
+                                    {displayProduct.price.toFixed(2)} €
+                                </p>
+                                <p className="text-lg text-gray-400 line-through mb-1">
+                                    {(displayProduct.price * 1.2).toFixed(2)} €
+                                </p>
+                                <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded mb-1 ml-auto">
+                                    Du sparst {(displayProduct.price * 0.2).toFixed(2)} €
+                                </span>
+                            </div>
+
+                            <div className="flex items-center gap-2 text-sm text-orange-600 font-medium animate-pulse">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
+                                    <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
+                                    <path fillRule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 0 1 0-1.113ZM17.25 12a5.25 5.25 0 1 1-10.5 0 5.25 5.25 0 0 1 10.5 0Z" clipRule="evenodd" />
+                                </svg>
+                                <span>{viewers} Personen schauen sich dieses Produkt gerade an</span>
+                            </div>
+
+                            {colorVariantsOnly.length > 0 && (
+                                <div>
+                                    <span className="text-sm font-bold text-gray-900 mb-2 block">Farbe: <span className="font-normal text-gray-600">{displayProduct.color ?? displayProduct.name.split(' - ').pop()}</span></span>
+                                    <div className="flex flex-wrap gap-2">
+                                        {colorVariantsOnly.map((v) => (
+                                            <button
+                                                key={v.id}
+                                                type="button"
+                                                onClick={() => handleVariantSelect(v)}
+                                                className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${selectedVariant.id === v.id ? 'border-black bg-black text-white' : 'border-gray-200 hover:border-gray-400 text-gray-700'}`}
+                                            >
+                                                {(v.color ?? v.id.split('-').slice(1).join('-')) || v.id}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                            {!variants?.length && displayProduct.color && (
+                                <div>
+                                    <span className="text-sm font-bold text-gray-900 mb-2 block">Farbe: <span className="font-normal text-gray-600">{displayProduct.color}</span></span>
+                                </div>
+                            )}
+
                             <div className="flex gap-4">
-                                <div className="flex items-center border border-gray-300 w-32 h-12 rounded-lg">
+                                <div className="flex items-center border border-gray-300 w-32 h-12 rounded-lg flex-shrink-0">
                                     <button
                                         onClick={() => setQuantity(Math.max(1, quantity - 1))}
                                         className="w-10 h-full flex items-center justify-center hover:bg-gray-50 text-gray-600 rounded-l-lg"
                                     >
                                         -
                                     </button>
-                                    <input 
-                                        type="text" 
-                                        value={quantity} 
-                                        readOnly 
+                                    <input
+                                        type="text"
+                                        value={quantity}
+                                        readOnly
                                         className="flex-1 w-full text-center font-medium border-none focus:ring-0 p-0 bg-transparent"
                                     />
                                     <button
@@ -244,55 +280,13 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
                                     {displayProduct.inStock ? 'In den Warenkorb' : 'Ausverkauft'}
                                 </button>
                             </div>
-                            
-                            {/* Shipping Timer */}
+
                             <div className="bg-blue-50 text-blue-800 text-xs px-4 py-3 rounded-lg flex items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4 flex-shrink-0">
                                     <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clipRule="evenodd" />
                                 </svg>
                                 <span>Bestelle innerhalb von <b>{timeLeft}</b> für Versand <b>HEUTE</b></span>
                             </div>
-                        </div>
-                        
-                        {/* Accordion / Tabs */}
-                        <div className="border rounded-lg overflow-hidden mt-8">
-                             <div className="flex border-b bg-gray-50">
-                                 <button 
-                                    onClick={() => setActiveTab('details')}
-                                    className={`flex-1 py-3 text-sm font-medium ${activeTab === 'details' ? 'bg-white border-b-2 border-black text-black' : 'text-gray-500 hover:text-gray-700'}`}
-                                 >
-                                     Details
-                                 </button>
-                                 <button 
-                                    onClick={() => setActiveTab('shipping')}
-                                    className={`flex-1 py-3 text-sm font-medium ${activeTab === 'shipping' ? 'bg-white border-b-2 border-black text-black' : 'text-gray-500 hover:text-gray-700'}`}
-                                 >
-                                     Versand
-                                 </button>
-                             </div>
-                             <div className="p-4 text-sm text-gray-600 leading-relaxed min-h-[150px]">
-                                {activeTab === 'details' ? (
-                                    <ul className="list-disc pl-4 space-y-1">
-                                        <li>Altersempfehlung: 3-6 Jahre</li>
-                                        <li>Geschwindigkeit: 3-6 km/h</li>
-                                        <li>Akku: 12V 7Ah (inklusive)</li>
-                                        <li>Max. Zuladung: 30kg</li>
-                                        <li>Features: LED-Licht, MP3-Player, Soft-Start</li>
-                                    </ul>
-                                ) : (
-                                    <div>
-                                        <p className="mb-2">
-                                            <strong>Lieferzeit:</strong> {formatShippingTime(displayProduct.shippingTime)} (innerhalb Deutschlands).
-                                        </p>
-                                        <p className="mb-2">
-                                            {displayProduct.shippingCost != null && displayProduct.shippingCost > 0
-                                                ? `Versandkosten: ${displayProduct.shippingCost.toFixed(2)} €`
-                                                : 'Kostenloser Versand mit DHL/DPD ab 50 € Bestellwert.'}
-                                        </p>
-                                        <p className="mt-2">30 Tage Rückgaberecht. Kostenloser Rückversand.</p>
-                                    </div>
-                                )}
-                             </div>
                         </div>
                     </div>
                 </div>
