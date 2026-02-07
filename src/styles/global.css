@@ -19,8 +19,9 @@
     @apply bg-white text-black border border-black px-6 py-3 text-sm font-medium hover:bg-gray-50 transition-colors duration-200 inline-flex items-center justify-center;
   }
 
-  /* HTML-Beschreibungen aus der DB (Listen, Absätze, Fett) */
-  .product-description p {
+  /* HTML-Beschreibungen aus der DB (Listen, Absätze, Fett, div, span mit style) */
+  .product-description p,
+  .product-description div {
     @apply mb-3 last:mb-0;
   }
   .product-description strong {

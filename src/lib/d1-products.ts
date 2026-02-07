@@ -34,32 +34,61 @@ export interface D1PreparedStatement {
 
 /**
  * Mappt eine D1-Zeile auf das Frontend-Product-Format.
+ * Berücksichtigt DB-Format: images als JSON (evtl. mit ""-Escaping), description mit HTML.
  */
 export function mapD1RowToProduct(row: D1ProductRow): Product {
-	const imagesJson = row.images ? tryParseImages(row.images) : [];
-	const mainImage = row.main_image ?? (imagesJson.length > 0 ? imagesJson[0] : '');
+	const imagesArr = row.images ? tryParseImages(row.images) : [];
+	const mainImage = row.main_image ?? (imagesArr.length > 0 ? imagesArr[0] : '');
+	const allImages =
+		mainImage && !imagesArr.includes(mainImage)
+			? [mainImage, ...imagesArr]
+			: imagesArr.length > 0
+				? imagesArr
+				: mainImage
+					? [mainImage]
+					: [];
 	const price = row.uvp ?? row.price_b2b ?? 0;
 	const qty = row.quantity ?? 0;
-	const inStock = qty > 0 || (row.status?.toLowerCase() === 'instock');
+	const status = row.status?.toLowerCase();
+	const inStock = qty > 0 || status === 'instock';
 
 	return {
 		id: row.sku,
 		name: row.name ?? 'Unbekannt',
-		description: row.description ?? '',
+		description: normalizeDescriptionHtml(row.description ?? ''),
 		price: Math.round(price * 100) / 100,
 		image: mainImage,
+		images: allImages.length > 0 ? allImages : undefined,
 		category: row.category ?? '',
 		inStock,
 	};
 }
 
+/** JSON-Array von Bild-URLs parsen; verträgt ""-Escaping wie aus CSV/Export. */
 function tryParseImages(images: string): string[] {
+	let str = images.trim();
 	try {
-		const parsed = JSON.parse(images);
-		return Array.isArray(parsed) ? parsed : [];
+		let parsed = JSON.parse(str);
+		if (Array.isArray(parsed)) return parsed.filter((u): u is string => typeof u === 'string');
+		return [];
 	} catch {
+		if (str.includes('""')) {
+			try {
+				const fixed = str.replace(/""/g, '"');
+				const parsed = JSON.parse(fixed);
+				if (Array.isArray(parsed)) return parsed.filter((u): u is string => typeof u === 'string');
+			} catch {
+				// ignore
+			}
+		}
 		return [];
 	}
+}
+
+/** HTML in Beschreibungen normalisieren (z. B. "" -> " für gültige style-Attribute). */
+function normalizeDescriptionHtml(html: string): string {
+	if (!html) return '';
+	return html.replace(/""/g, '"');
 }
 
 /**

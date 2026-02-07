@@ -86,18 +86,21 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                             alt={product.name}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
-                        {/* Discount Badge */}
-                        <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
-                            -20% Sale
+                        {product.price > 0 && product.inStock && (
+                            <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
+                                -20% Sale
+                            </div>
+                        )}
+                    </div>
+                    {(product.images?.length ?? 0) > 1 && (
+                        <div className="grid grid-cols-4 gap-4">
+                            {product.images!.slice(0, 4).map((src, i) => (
+                                <div key={i} className={`aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 ${i === 0 ? 'border-black' : 'border-transparent hover:border-gray-300'} transition-all`}>
+                                    <img src={src} alt="" className="w-full h-full object-cover" />
+                                </div>
+                            ))}
                         </div>
-                    </div>
-                    <div className="grid grid-cols-4 gap-4">
-                        {[0,1,2,3].map((i) => (
-                             <div key={i} className={`aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 ${i === 0 ? 'border-black' : 'border-transparent hover:border-gray-300'} transition-all`}>
-                                <img src={product.image} alt="" className="w-full h-full object-cover" />
-                             </div>
-                        ))}
-                    </div>
+                    )}
                 </div>
 
                 {/* Product Info Section */}
