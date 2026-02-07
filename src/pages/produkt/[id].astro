@@ -1,17 +1,19 @@
 ---
+export const prerender = false;
+
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import ProductDetail from '../../components/ProductDetail';
-import { products } from '../../data/products';
+import { getProductBySkuFromD1 } from '../../lib/d1-products';
+import { products as staticProducts } from '../../data/products';
 
-export function getStaticPaths() {
-	return products.map((product) => ({
-		params: { id: product.id },
-		props: { product },
-	}));
-}
+const sku = Astro.params.id;
+if (!sku) return Astro.redirect('/produkte');
 
-const { product } = Astro.props;
+const db = Astro.locals.runtime?.env?.DB as import('../../lib/d1-products').D1Database | undefined;
+let product = db ? await getProductBySkuFromD1(db, sku) : staticProducts.find((p) => p.id === sku) ?? null;
+
+if (!product) return Astro.redirect('/produkte');
 ---
 
 <Layout title={`${product.name} - E-Kinderauto Shop`}>

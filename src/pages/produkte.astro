@@ -1,13 +1,17 @@
 ---
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import ProductCard from '../components/ProductCard.astro';
 import NewsletterModal from '../components/NewsletterModal';
-import { products } from '../data/products';
+import { products as staticProducts } from '../data/products';
+import { getProductsFromD1 } from '../lib/d1-products';
 import { categories } from '../data/shop-content';
 
-// Get unique categories for filter
-const allCategories = ['Alle', ...new Set(products.map(p => p.category))];
+const db = Astro.locals.runtime?.env?.DB as import('../lib/d1-products').D1Database | undefined;
+const products = db ? await getProductsFromD1(db, 200) : staticProducts;
+const allCategories = ['Alle', ...new Set(products.map(p => p.category).filter(Boolean))];
 ---
 
 <Layout title="Alle Produkte - E-Kinderauto">
