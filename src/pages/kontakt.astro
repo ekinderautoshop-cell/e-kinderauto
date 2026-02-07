@@ -1,0 +1,67 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import NewsletterModal from '../components/NewsletterModal';
+import { FORMSPARK_ACTION } from '../lib/formspark';
+---
+
+<Layout title="Kontakt - E-Kinderauto">
+	<Header />
+	<NewsletterModal client:idle />
+	<main class="bg-white pb-20">
+		<div class="bg-gray-50 py-12 md:py-20 mb-12 border-b border-gray-100">
+			<div class="container mx-auto px-6 md:px-12 text-center">
+				<h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Kontakt</h1>
+				<p class="text-gray-500 max-w-2xl mx-auto text-lg">
+					Hast du Fragen? Schreib uns – wir melden uns schnellstmöglich.
+				</p>
+			</div>
+		</div>
+
+		<div class="container mx-auto px-6 md:px-12 max-w-xl">
+			<form action={FORMSPARK_ACTION} method="POST" class="space-y-5">
+				<input type="hidden" name="_subject" value="Kontaktanfrage – E-Kinderauto" />
+				<input type="hidden" name="form_type" value="kontakt" />
+				<div>
+					<label for="kontakt-name" class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+					<input
+						id="kontakt-name"
+						type="text"
+						name="name"
+						required
+						class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors"
+						placeholder="Dein Name"
+					/>
+				</div>
+				<div>
+					<label for="kontakt-email" class="block text-sm font-medium text-gray-700 mb-1">E-Mail *</label>
+					<input
+						id="kontakt-email"
+						type="email"
+						name="email"
+						required
+						class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors"
+						placeholder="deine@email.de"
+					/>
+				</div>
+				<div>
+					<label for="kontakt-message" class="block text-sm font-medium text-gray-700 mb-1">Nachricht *</label>
+					<textarea
+						id="kontakt-message"
+						name="message"
+						required
+						rows="5"
+						class="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors resize-y"
+						placeholder="Deine Nachricht …"
+					></textarea>
+				</div>
+				<button
+					type="submit"
+					class="w-full bg-black text-white px-4 py-3 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors"
+				>
+					Nachricht senden
+				</button>
+			</form>
+		</div>
+	</main>
+</Layout>

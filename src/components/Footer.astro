@@ -1,16 +1,21 @@
 ---
+import { FORMSPARK_ACTION } from '../lib/formspark';
 ---
 
 <footer class="bg-gray-50 border-t border-gray-100 pt-16 pb-8">
     <div class="container mx-auto px-6 md:px-12">
         <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-            <!-- Newsletter -->
+            <!-- Newsletter (Formspark) -->
             <div class="md:col-span-1">
                 <h3 class="text-sm font-bold uppercase tracking-wider mb-4">Newsletter</h3>
                 <p class="text-gray-500 text-sm mb-4">Abonniere unseren Newsletter für exklusive Angebote.</p>
-                <form class="flex gap-2">
+                <form action={FORMSPARK_ACTION} method="POST" class="flex gap-2">
+                    <input type="hidden" name="_subject" value="Newsletter Anmeldung – E-Kinderauto" />
+                    <input type="hidden" name="form_type" value="newsletter" />
                     <input 
                         type="email" 
+                        name="email"
+                        required
                         placeholder="Deine E-Mail" 
                         class="w-full bg-white border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:border-black transition-colors"
                     />
@@ -40,7 +45,7 @@
                     <li><a href="#" class="hover:text-black transition-colors">Unsere Geschichte</a></li>
                     <li><a href="#" class="hover:text-black transition-colors">Nachhaltigkeit</a></li>
                     <li><a href="#" class="hover:text-black transition-colors">Karriere</a></li>
-                    <li><a href="#" class="hover:text-black transition-colors">Kontakt</a></li>
+                    <li><a href="/kontakt" class="hover:text-black transition-colors">Kontakt</a></li>
                 </ul>
             </div>
 

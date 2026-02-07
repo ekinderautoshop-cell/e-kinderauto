@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
+import { FORMSPARK_ACTION } from '../lib/formspark';
 
 export default function NewsletterModal() {
     const [isOpen, setIsOpen] = useState(false);
     const [email, setEmail] = useState('');
     const [submitted, setSubmitted] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         // Show modal after 5 seconds if not already subscribed/closed
@@ -21,13 +24,28 @@ export default function NewsletterModal() {
         localStorage.setItem('hasSeenNewsletter', 'true');
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        // Simulate API call
-        setSubmitted(true);
-        setTimeout(() => {
-            handleClose();
-        }, 2000);
+        setError(null);
+        setSubmitting(true);
+        try {
+            const res = await fetch(FORMSPARK_ACTION, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    _subject: 'Newsletter Anmeldung (Modal) – E-Kinderauto',
+                    form_type: 'newsletter_modal',
+                }),
+            });
+            if (!res.ok) throw new Error('Fehler beim Senden');
+            setSubmitted(true);
+            setTimeout(() => handleClose(), 2000);
+        } catch {
+            setError('Leider ist etwas schiefgelaufen. Bitte später erneut versuchen.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     if (!isOpen) return null;
@@ -81,13 +99,16 @@ export default function NewsletterModal() {
                                     placeholder="Deine E-Mail Adresse"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
-                                    className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors"
+                                    disabled={submitting}
+                                    className="w-full border border-gray-300 px-4 py-3 text-sm focus:outline-none focus:border-black transition-colors disabled:opacity-60"
                                 />
+                                {error && <p className="text-sm text-red-600">{error}</p>}
                                 <button 
                                     type="submit"
-                                    className="w-full bg-black text-white px-4 py-3 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors"
+                                    disabled={submitting}
+                                    className="w-full bg-black text-white px-4 py-3 text-sm font-bold uppercase tracking-widest hover:bg-gray-800 transition-colors disabled:opacity-60"
                                 >
-                                    Jetzt Rabatt sichern
+                                    {submitting ? 'Wird gesendet…' : 'Jetzt Rabatt sichern'}
                                 </button>
                             </form>
                             <p className="text-[10px] text-gray-400 mt-4 text-center md:text-left">
