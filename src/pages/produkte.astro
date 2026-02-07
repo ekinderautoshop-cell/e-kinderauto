@@ -8,7 +8,7 @@ import NewsletterModal from '../components/NewsletterModal';
 import { products as staticProducts } from '../data/products';
 import { getProductsFromD1 } from '../lib/d1-products';
 import { categoryOrder, categoryToSlug, ALLOWED_CATEGORY_NAMES } from '../data/shop-content';
-import { groupProductsByBase } from '../lib/d1-products';
+import { groupProductsByBase, isShortNameSingleWord } from '../lib/d1-products';
 
 const db = Astro.locals.runtime?.env?.DB as import('../lib/d1-products').D1Database | undefined;
 const allFromDb = db ? await getProductsFromD1(db) : staticProducts;
@@ -18,7 +18,8 @@ const kategorieParam = Astro.url.searchParams.get('kategorie') ?? '';
 const filtered = kategorieParam
 	? allProductsRaw.filter((p) => categoryToSlug(p.category) === kategorieParam)
 	: allProductsRaw;
-const products = groupProductsByBase(filtered);
+const grouped = groupProductsByBase(filtered);
+const products = grouped.filter((p) => !isShortNameSingleWord(p.name));
 
 const productCategoryNames = [...new Set(allProductsRaw.map((p) => p.category).filter(Boolean))] as string[];
 const categoryNamesInOrder = categoryOrder.map((c) => c.name);

@@ -184,6 +184,12 @@ export function getShortProductName(fullName: string, maxLength = 52): string {
 	return name;
 }
 
+/** True, wenn der Kurzname nur aus einem Wort besteht (solche Produkte sollen nicht angezeigt werden). */
+export function isShortNameSingleWord(fullName: string): boolean {
+	const short = getShortProductName(fullName).trim();
+	return short.length > 0 && short.split(/\s+/).length <= 1;
+}
+
 /**
  * Gruppiert Produkte nach Basis-SKU (ein Eintrag pro Modell, Varianten zusammengefasst).
  * Gibt ein Repräsentanten-Produkt pro Gruppe zurück (Basis-SKU bevorzugt, sonst erste Variante).
