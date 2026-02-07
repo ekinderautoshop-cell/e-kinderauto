@@ -2,17 +2,5 @@ name = "e-kinderauto-shop"
 compatibility_date = "2024-01-01"
 pages_build_output_dir = "dist"
 
-# D1: Binding "DB" wie im Cloudflare-Pages-Dashboard.
-# Für lokales Dev: database_id aus Dashboard (D1 > e-kinderauto > Settings) eintragen.
-[[d1_databases]]
-binding = "DB"
-database_name = "e-kinderauto"
-database_id = "YOUR_D1_DATABASE_ID"
-
-[env.production]
-name = "e-kinderauto-shop"
-
-[[env.production.d1_databases]]
-binding = "DB"
-database_name = "e-kinderauto"
-database_id = "YOUR_D1_DATABASE_ID"
+# D1-Binding "DB" wird im Cloudflare-Pages-Dashboard gesetzt (Settings > Functions > D1).
+# Für lokales Dev (wrangler pages dev): hier [[d1_databases]] mit echter database_id eintragen.
