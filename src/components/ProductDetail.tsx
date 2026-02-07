@@ -100,39 +100,41 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
 
 	return (
 		<div className="relative">
-            <div className="grid md:grid-cols-2 gap-12 lg:gap-16 pb-20">
-                {/* Gallery Section – klickbare Bildauswahl */}
-                <div className="space-y-4">
-                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative group">
-                        <img
-                            src={mainImageUrl}
-                            alt={displayName}
-                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        {displayProduct.price > 0 && displayProduct.inStock && (
-                            <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
-                                -20% Sale
-                            </div>
-                        )}
-                    </div>
-                    {displayImages.length > 1 && (
-                        <div className="grid grid-cols-4 gap-4">
+            {/* Hero: breites Produktbild oben */}
+            <section className="w-full -mx-4 sm:mx-0 sm:rounded-xl overflow-hidden mb-8 md:mb-12">
+                <div className="aspect-[16/10] md:aspect-[21/9] bg-gray-100 relative group">
+                    <img
+                        src={mainImageUrl}
+                        alt={displayName}
+                        className="w-full h-full object-cover object-center transition-transform duration-500 group-hover:scale-[1.02]"
+                    />
+                    {displayProduct.price > 0 && displayProduct.inStock && (
+                        <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
+                            -20% Sale
+                        </div>
+                    )}
+                </div>
+                {displayImages.length > 1 && (
+                    <div className="container mx-auto px-4 mt-4">
+                        <div className="flex gap-3 overflow-x-auto pb-2">
                             {displayImages.slice(0, 8).map((src, i) => (
                                 <button
                                     key={i}
                                     type="button"
                                     onClick={() => setSelectedImageIndex(i)}
-                                    className={`aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${selectedImageIndex === i ? 'border-black ring-1 ring-black' : 'border-transparent hover:border-gray-300'}`}
+                                    className={`flex-shrink-0 w-20 h-20 md:w-24 md:h-24 bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${selectedImageIndex === i ? 'border-black ring-1 ring-black' : 'border-transparent hover:border-gray-300'}`}
                                 >
                                     <img src={src} alt="" className="w-full h-full object-cover" />
                                 </button>
                             ))}
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
+            </section>
 
-                {/* Product Info Section */}
-                <div className="flex flex-col justify-start pt-2">
+            {/* Produktinfos und Bestellung darunter */}
+            <div className="max-w-2xl mx-auto px-4 pb-24 md:pb-20">
+                <div className="flex flex-col">
                     {/* Breadcrumbs */}
                     <nav className="flex text-xs text-gray-500 mb-4">
                         <a href="/" className="hover:text-black">Home</a>
