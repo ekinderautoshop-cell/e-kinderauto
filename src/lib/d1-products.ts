@@ -12,6 +12,8 @@ export interface D1ProductRow {
 	parent_sku: string | null;
 	price_b2b: number | null;
 	uvp: number | null;
+	/** Anzeigepreis (wird verwendet). */
+	end_price: number | null;
 	quantity: number | null;
 	tax: number | null;
 	ean: string | null;
@@ -47,7 +49,7 @@ export function mapD1RowToProduct(row: D1ProductRow): Product {
 				: mainImage
 					? [mainImage]
 					: [];
-	const price = row.uvp ?? row.price_b2b ?? 0;
+	const price = row.end_price ?? row.uvp ?? row.price_b2b ?? 0;
 	const qty = row.quantity ?? 0;
 	const status = row.status?.toLowerCase();
 	const inStock = qty > 0 || status === 'instock';
