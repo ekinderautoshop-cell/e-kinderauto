@@ -1,26 +1,29 @@
-/** Kategorien wie auf e-kinderauto.de (für Startseite-Kacheln und Sidebar-Reihenfolge). */
-export const categoryOrder: { name: string; slug: string }[] = [
-    { name: 'Kinderfahrzeuge', slug: 'kinderfahrzeuge' },
-    { name: 'RC Panzer und Militär', slug: 'rc-panzer-und-militaer' },
-    { name: 'Baufahrzeuge', slug: 'baufahrzeuge' },
-    { name: 'Elektro Kinderfahrzeuge (Oldtimer)', slug: 'elektro-kinderfahrzeuge-oldtimer' },
-    { name: 'Elektro Kinderfahrzeuge (mit Lizenz)', slug: 'elektro-kinderfahrzeuge-mit-lizenz' },
-    { name: 'Polizei/Feuerwehr', slug: 'polizei-feuerwehr' },
-    { name: 'Ersatzteile-Zubehör', slug: 'ersatzteile-zubehoer' },
-    { name: 'Ersatzteile', slug: 'ersatzteile' },
-    { name: 'XXL Fahrzeuge', slug: 'xxl-fahrzeuge' },
-    { name: 'Elektro Kindermotorräder', slug: 'elektro-kindermotorraeder' },
-    { name: 'E-Scooters und Quads', slug: 'e-scooters-und-quads' },
-    { name: '2 Sitzer Coco', slug: '2-sitzer-coco' },
-    { name: 'Outdoor Spielzeuge', slug: 'outdoor-spielzeuge' },
-    { name: 'RC Modellbau', slug: 'rc-modellbau' },
-    { name: 'Elektronik', slug: 'elektronik' },
-    { name: 'Tierzubehör', slug: 'tierzubehoer' },
-    { name: 'Kleine E-Scooter', slug: 'kleine-e-scooter' },
-    { name: 'E-Scooters und E-Bikes', slug: 'e-scooters-und-e-bikes' },
-    { name: 'Coco Bikes - Chopper', slug: 'coco-bikes-chopper' },
-    { name: 'E-Scooter Dezent', slug: 'e-scooter-dezent' },
-];
+/** Nur diese Kategorien aus der Produkt-DB anzeigen (Sidebar + Filter). */
+export const ALLOWED_CATEGORY_NAMES = [
+    'Kinderfahrzeuge',
+    'RC Panzer und Militär',
+    'Baufahrzeuge',
+    'Elektro Kinderfahrzeuge (Oldtimer)',
+    'Elektro Kinderfahrzeuge (mit Lizenz)',
+    'Polizei/Feuerwehr',
+    'XXL Fahrzeuge',
+    'Elektro Kindermotorräder',
+    'E-Scooters und Quads',
+    '2 Sitzer Coco',
+    'Outdoor Spielzeuge',
+    'RC Modellbau',
+    'Elektronik',
+    'Kleine E-Scooter',
+    'E-Scooters und E-Bikes',
+    'Coco Bikes - Chopper',
+    'E-Scooter Dezent',
+] as const;
+
+/** Reihenfolge der Kategorien (nur erlaubte aus der DB). */
+export const categoryOrder: { name: string; slug: string }[] = ALLOWED_CATEGORY_NAMES.map((name) => ({
+    name,
+    slug: categoryToSlug(name),
+}));
 
 /** Slug aus Kategoriename (für URL-Filter). */
 export function categoryToSlug(name: string): string {

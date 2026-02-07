@@ -6,12 +6,14 @@ import Header from '../components/Header.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { products as staticProducts } from '../data/products';
 import { getProductsFromD1, groupProductsByBase } from '../lib/d1-products';
-import { categories, testimonials } from '../data/shop-content';
+import { categories, testimonials, ALLOWED_CATEGORY_NAMES } from '../data/shop-content';
 import NewsletterModal from '../components/NewsletterModal';
 import FaqSection from '../components/FaqSection';
 
 const db = Astro.locals.runtime?.env?.DB as import('../lib/d1-products').D1Database | undefined;
-const rawProducts = db ? await getProductsFromD1(db, 100) : staticProducts;
+const fromDb = db ? await getProductsFromD1(db, 100) : staticProducts;
+const allowedSet = new Set(ALLOWED_CATEGORY_NAMES);
+const rawProducts = fromDb.filter((p) => p.category && allowedSet.has(p.category));
 const products = groupProductsByBase(rawProducts).slice(0, 24);
 ---
 
