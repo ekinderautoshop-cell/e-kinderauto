@@ -4,27 +4,32 @@ export const prerender = false;
 import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import ProductDetail from '../../components/ProductDetail';
-import { getProductBySkuFromD1 } from '../../lib/d1-products';
+import { getProductVariantsByBaseSku, getProductBySkuFromD1, getBaseSku } from '../../lib/d1-products';
 import { products as staticProducts } from '../../data/products';
 
 const sku = Astro.params.id;
 if (!sku) return Astro.redirect('/produkte');
 
+const baseSku = sku.includes('-') ? sku.split('-')[0]! : sku;
 const db = Astro.locals.runtime?.env?.DB as import('../../lib/d1-products').D1Database | undefined;
-let product = db ? await getProductBySkuFromD1(db, sku) : staticProducts.find((p) => p.id === sku) ?? null;
-if (!product && db && sku.includes('-')) {
-	const baseSku = sku.split('-')[0];
-	if (baseSku) product = await getProductBySkuFromD1(db, baseSku);
-}
-if (!product && !db) product = staticProducts.find((p) => p.id === sku || p.id === sku.split('-')[0]) ?? null;
 
-if (!product) return Astro.redirect('/produkte');
+let variants: import('../../types/product').Product[] = [];
+if (db) {
+	variants = await getProductVariantsByBaseSku(db, baseSku);
+}
+if (variants.length === 0 && !db) {
+	const single = staticProducts.find((p) => p.id === sku || getBaseSku(p) === baseSku) ?? null;
+	if (single) variants = [single];
+}
+if (variants.length === 0) return Astro.redirect('/produkte');
+
+const product = variants.find((v) => v.id === sku) ?? variants[0]!;
 ---
 
 <Layout title={`${product.name} - E-Kinderauto Shop`}>
 	<Header />
 	<main class="container mx-auto px-4 py-8">
-		<ProductDetail product={product} client:load />
+		<ProductDetail product={product} variants={variants.length > 1 ? variants : undefined} client:load />
 	</main>
 </Layout>
 

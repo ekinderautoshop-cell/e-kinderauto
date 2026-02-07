@@ -3,6 +3,8 @@ import type { Product } from '../types/product';
 
 interface ProductDetailProps {
 	product: Product;
+	/** Alle Varianten (z. B. Farben) – wenn gesetzt, wird Farbauswahl angezeigt und nur ein Produkt repräsentiert. */
+	variants?: Product[];
 }
 
 /** Lieferzeit-String aus DB lesbar machen (z. B. "1-bis-3-tage" → "1–3 Werktage"). */
@@ -16,14 +18,22 @@ function formatShippingTime(shippingTime: string | undefined): string {
 	return t.replace(/-/g, ' ');
 }
 
-export default function ProductDetail({ product }: ProductDetailProps) {
+export default function ProductDetail({ product, variants }: ProductDetailProps) {
 	const [quantity, setQuantity] = useState(1);
 	const [activeTab, setActiveTab] = useState('details');
 	const [timeLeft, setTimeLeft] = useState('');
 	const [viewers, setViewers] = useState(12);
 	const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-	const displayImages = product.images?.length ? product.images : [product.image];
-	const mainImageUrl = displayImages[selectedImageIndex] ?? product.image;
+	const [selectedVariant, setSelectedVariant] = useState<Product>(product);
+	const displayProduct = variants && variants.length > 1 ? selectedVariant : product;
+	const displayImages = displayProduct.images?.length ? displayProduct.images : [displayProduct.image];
+	const mainImageUrl = displayImages[selectedImageIndex] ?? displayProduct.image;
+
+	const handleVariantSelect = (v: Product) => {
+		setSelectedVariant(v);
+		setSelectedImageIndex(0);
+		if (typeof window !== 'undefined') window.history.replaceState({}, '', `/produkt/${v.id}`);
+	};
 
     // Countdown Timer Logic
     useEffect(() => {
@@ -57,16 +67,21 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         };
     }, []);
 
+    useEffect(() => {
+        setSelectedVariant(product);
+        setSelectedImageIndex(0);
+    }, [product.id]);
+
 	const addToCart = () => {
 		const cart = JSON.parse(localStorage.getItem('cart') || '[]');
 		const existingItem = cart.find((item: { product: Product; quantity: number }) => 
-			item.product.id === product.id
+			item.product.id === displayProduct.id
 		);
 
 		if (existingItem) {
 			existingItem.quantity += quantity;
 		} else {
-			cart.push({ product, quantity });
+			cart.push({ product: displayProduct, quantity });
 		}
 
 		localStorage.setItem('cart', JSON.stringify(cart));
@@ -97,10 +112,10 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative group">
                         <img
                             src={mainImageUrl}
-                            alt={product.name}
+                            alt={displayProduct.name}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
-                        {product.price > 0 && product.inStock && (
+                        {displayProduct.price > 0 && displayProduct.inStock && (
                             <div className="absolute top-4 left-4 bg-red-600 text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-sm">
                                 -20% Sale
                             </div>
@@ -128,10 +143,10 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     <nav className="flex text-xs text-gray-500 mb-4">
                         <a href="/" className="hover:text-black">Home</a>
                         <span className="mx-2">/</span>
-                        <span className="capitalize">{product.category}</span>
+                        <span className="capitalize">{displayProduct.category}</span>
                     </nav>
 
-                    <h1 className="text-3xl md:text-4xl font-bold mb-2 text-gray-900 tracking-tight">{product.name}</h1>
+                    <h1 className="text-3xl md:text-4xl font-bold mb-2 text-gray-900 tracking-tight">{displayProduct.name}</h1>
                     
                     {/* Rating & Reviews */}
                     <div className="flex items-center gap-2 mb-6">
@@ -146,13 +161,13 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     {/* Price */}
                     <div className="flex items-end gap-3 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
                         <p className="text-3xl font-bold text-gray-900">
-                            {product.price.toFixed(2)} €
+                            {displayProduct.price.toFixed(2)} €
                         </p>
                          <p className="text-lg text-gray-400 line-through mb-1">
-                            {(product.price * 1.2).toFixed(2)} €
+                            {(displayProduct.price * 1.2).toFixed(2)} €
                         </p>
                         <span className="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded mb-1 ml-auto">
-                            Du sparst {(product.price * 0.2).toFixed(2)} €
+                            Du sparst {(displayProduct.price * 0.2).toFixed(2)} €
                         </span>
                     </div>
 
@@ -168,16 +183,31 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     <div className="border-t border-gray-100 py-6 mb-6">
                         <div
                             className="product-description text-gray-600 leading-relaxed text-sm md:text-base"
-                            dangerouslySetInnerHTML={{ __html: product.description || '' }}
+                            dangerouslySetInnerHTML={{ __html: displayProduct.description || '' }}
                         />
                     </div>
 
-                    {/* Farbe nur anzeigen, wenn aus Name/DB vorhanden */}
-                    {product.color && (
+                    {/* Farb-/Variantenauswahl wenn mehrere Varianten (z. B. Schwarz, Weiss) */}
+                    {variants && variants.length > 1 && (
                         <div className="mb-6">
-                            <span className="text-sm font-bold text-gray-900 mb-2 block">
-                                Farbe: <span className="font-normal text-gray-600">{product.color}</span>
-                            </span>
+                            <span className="text-sm font-bold text-gray-900 mb-2 block">Farbe: <span className="font-normal text-gray-600">{displayProduct.color ?? displayProduct.name.split(' - ').pop()}</span></span>
+                            <div className="flex flex-wrap gap-2">
+                                {variants.map((v) => (
+                                    <button
+                                        key={v.id}
+                                        type="button"
+                                        onClick={() => handleVariantSelect(v)}
+                                        className={`px-4 py-2 rounded-lg border-2 text-sm font-medium transition-all ${selectedVariant.id === v.id ? 'border-black bg-black text-white' : 'border-gray-200 hover:border-gray-400 text-gray-700'}`}
+                                    >
+                                        {(v.color ?? v.id.split('-').slice(1).join('-')) || v.id}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                    {!variants?.length && displayProduct.color && (
+                        <div className="mb-6">
+                            <span className="text-sm font-bold text-gray-900 mb-2 block">Farbe: <span className="font-normal text-gray-600">{displayProduct.color}</span></span>
                         </div>
                     )}
 
@@ -208,14 +238,14 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                                 <button
                                     id="add-to-cart-btn"
                                     onClick={addToCart}
-                                    disabled={!product.inStock}
+                                    disabled={!displayProduct.inStock}
                                     className={`flex-1 h-12 text-sm uppercase font-bold tracking-widest transition-all rounded-lg shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 ${
-                                        product.inStock
+                                        displayProduct.inStock
                                             ? 'bg-black text-white hover:bg-gray-800'
                                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                                     }`}
                                 >
-                                    {product.inStock ? 'In den Warenkorb' : 'Ausverkauft'}
+                                    {displayProduct.inStock ? 'In den Warenkorb' : 'Ausverkauft'}
                                 </button>
                             </div>
                             
@@ -256,11 +286,11 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                                 ) : (
                                     <div>
                                         <p className="mb-2">
-                                            <strong>Lieferzeit:</strong> {formatShippingTime(product.shippingTime)} (innerhalb Deutschlands).
+                                            <strong>Lieferzeit:</strong> {formatShippingTime(displayProduct.shippingTime)} (innerhalb Deutschlands).
                                         </p>
                                         <p className="mb-2">
-                                            {product.shippingCost != null && product.shippingCost > 0
-                                                ? `Versandkosten: ${product.shippingCost.toFixed(2)} €`
+                                            {displayProduct.shippingCost != null && displayProduct.shippingCost > 0
+                                                ? `Versandkosten: ${displayProduct.shippingCost.toFixed(2)} €`
                                                 : 'Kostenloser Versand mit DHL/DPD ab 50 € Bestellwert.'}
                                         </p>
                                         <p className="mt-2">30 Tage Rückgaberecht. Kostenloser Rückversand.</p>
@@ -275,15 +305,15 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             {/* Sticky Mobile Add to Cart */}
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-2xl md:hidden z-40 flex items-center gap-4 animate-slide-up">
                  <div className="hidden sm:block">
-                     <p className="font-bold text-sm truncate max-w-[150px]">{product.name}</p>
-                     <p className="text-sm font-medium">{product.price.toFixed(2)} €</p>
+                     <p className="font-bold text-sm truncate max-w-[150px]">{displayProduct.name}</p>
+                     <p className="text-sm font-medium">{displayProduct.price.toFixed(2)} €</p>
                  </div>
                  <button
                     id="sticky-add-to-cart-btn"
                     onClick={addToCart}
-                    disabled={!product.inStock}
+                    disabled={!displayProduct.inStock}
                     className={`flex-1 h-12 text-sm uppercase font-bold tracking-widest rounded-lg ${
-                        product.inStock
+                        displayProduct.inStock
                             ? 'bg-black text-white hover:bg-gray-800'
                             : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                     }`}

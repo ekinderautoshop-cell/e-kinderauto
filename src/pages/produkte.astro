@@ -8,16 +8,17 @@ import NewsletterModal from '../components/NewsletterModal';
 import { products as staticProducts } from '../data/products';
 import { getProductsFromD1 } from '../lib/d1-products';
 import { categoryOrder, categoryToSlug } from '../data/shop-content';
+import { groupProductsByBase } from '../lib/d1-products';
 
 const db = Astro.locals.runtime?.env?.DB as import('../lib/d1-products').D1Database | undefined;
-const allProducts = db ? await getProductsFromD1(db) : staticProducts;
-
+const allProductsRaw = db ? await getProductsFromD1(db) : staticProducts;
 const kategorieParam = Astro.url.searchParams.get('kategorie') ?? '';
-const products = kategorieParam
-	? allProducts.filter((p) => categoryToSlug(p.category) === kategorieParam)
-	: allProducts;
+const filtered = kategorieParam
+	? allProductsRaw.filter((p) => categoryToSlug(p.category) === kategorieParam)
+	: allProductsRaw;
+const products = groupProductsByBase(filtered);
 
-const productCategoryNames = [...new Set(allProducts.map((p) => p.category).filter(Boolean))] as string[];
+const productCategoryNames = [...new Set(allProductsRaw.map((p) => p.category).filter(Boolean))] as string[];
 const categoryNamesInOrder = categoryOrder.map((c) => c.name);
 const sortedCategories = productCategoryNames.sort((a, b) => {
 	const ai = categoryNamesInOrder.indexOf(a);

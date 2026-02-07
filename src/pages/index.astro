@@ -5,13 +5,14 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { products as staticProducts } from '../data/products';
-import { getProductsFromD1 } from '../lib/d1-products';
+import { getProductsFromD1, groupProductsByBase } from '../lib/d1-products';
 import { categories, testimonials } from '../data/shop-content';
 import NewsletterModal from '../components/NewsletterModal';
 import FaqSection from '../components/FaqSection';
 
 const db = Astro.locals.runtime?.env?.DB as import('../lib/d1-products').D1Database | undefined;
-const products = db ? await getProductsFromD1(db, 24) : staticProducts;
+const rawProducts = db ? await getProductsFromD1(db, 100) : staticProducts;
+const products = groupProductsByBase(rawProducts).slice(0, 24);
 ---
 
 <Layout title="E-Kinderauto - Premium Kinderfahrzeuge">

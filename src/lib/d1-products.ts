@@ -128,3 +128,56 @@ export async function getProductBySkuFromD1(db: D1Database, sku: string): Promis
 	const row = await stmt.first<D1ProductRow>();
 	return row ? mapD1RowToProduct(row as D1ProductRow) : null;
 }
+
+/** Basis-SKU für Gruppierung (z. B. ET5771-Grau → ET5771, ET471 → ET471). */
+export function getBaseSku(product: Product): string {
+	return product.id.includes('-') ? product.id.split('-')[0]! : product.id;
+}
+
+/** Entfernt Farb-/Varianten-Suffix aus dem Namen für die Gruppenanzeige. */
+export function getBaseProductName(product: Product): string {
+	if (!product.color) return product.name;
+	const suffix = ` - ${product.color}`;
+	return product.name.endsWith(suffix) ? product.name.slice(0, -suffix.length) : product.name;
+}
+
+/**
+ * Gruppiert Produkte nach Basis-SKU (ein Eintrag pro Modell, Varianten zusammengefasst).
+ * Gibt ein Repräsentanten-Produkt pro Gruppe zurück (Basis-SKU bevorzugt, sonst erste Variante).
+ */
+export function groupProductsByBase(products: Product[]): Product[] {
+	const byBase = new Map<string, Product[]>();
+	for (const p of products) {
+		const base = getBaseSku(p);
+		if (!byBase.has(base)) byBase.set(base, []);
+		byBase.get(base)!.push(p);
+	}
+	const result: Product[] = [];
+	for (const variants of byBase.values()) {
+		const baseSku = getBaseSku(variants[0]!);
+		const main = variants.find((v) => v.id === baseSku) ?? variants[0]!;
+		result.push({
+			...main,
+			id: baseSku,
+			name: getBaseProductName(main),
+			inStock: variants.some((v) => v.inStock),
+			price: Math.min(...variants.map((v) => v.price)),
+		});
+	}
+	return result;
+}
+
+/**
+ * Lädt alle Varianten eines Produkts (Basis-SKU + alle SKU-Farbvarianten).
+ */
+export async function getProductVariantsByBaseSku(
+	db: D1Database,
+	baseSku: string
+): Promise<Product[]> {
+	const pattern = `${baseSku}-%`;
+	const stmt = db
+		.prepare('SELECT * FROM products WHERE sku = ? OR sku LIKE ? ORDER BY sku')
+		.bind(baseSku, pattern);
+	const { results } = await stmt.all<D1ProductRow>();
+	return (results ?? []).map((row) => mapD1RowToProduct(row as D1ProductRow));
+}
