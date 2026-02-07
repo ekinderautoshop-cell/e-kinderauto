@@ -17,7 +17,9 @@ const rawProducts = fromDb.filter(
 	(p) => p.category && allowedSet.has(p.category) && !isErsatzteilProduct(p.name)
 );
 const grouped = groupProductsByBase(rawProducts).filter((p) => !isShortNameSingleWord(p.name));
-const products = grouped.slice(0, 24);
+// Zufällige Reihenfolge für Startseite
+const shuffled = [...grouped].sort(() => Math.random() - 0.5);
+const products = shuffled.slice(0, 24);
 ---
 
 <Layout title="E-Kinderauto - Premium Kinderfahrzeuge">
