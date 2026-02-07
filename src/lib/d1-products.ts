@@ -197,6 +197,12 @@ export function isErsatzteilProduct(name: string): boolean {
 	return /ersatzteil/i.test(name ?? '');
 }
 
+/** True, wenn Produkt nur unter Zusatzartikel angezeigt werden soll (Hauptplatine, Fahrtenregler, Rauchmodul, Ladegerät). */
+export function isZusatzartikelProduct(name: string): boolean {
+	const n = (name ?? '').toLowerCase();
+	return /hauptplatine|fahrtenregler|rauchmodul|ladegerät|ladegeraet/.test(n);
+}
+
 /**
  * Gruppiert Produkte nach Basis-SKU (ein Eintrag pro Modell, Varianten zusammengefasst).
  * Gibt ein Repräsentanten-Produkt pro Gruppe zurück (Basis-SKU bevorzugt, sonst erste Variante).

@@ -16,7 +16,6 @@ export const ALLOWED_CATEGORY_NAMES = [
     'E-Scooters und E-Bikes',
     'Coco Bikes - Chopper',
     'E-Scooter Dezent',
-    'Ladegerät',
 ] as const;
 
 /** Reihenfolge der Kategorien (nur erlaubte aus der DB). */
