@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Product } from '../types/product';
-import { getBaseSku } from '../lib/d1-products';
+import { getBaseSku, getShortProductName } from '../lib/d1-products';
 
 interface ProductDetailProps {
 	product: Product;
@@ -27,6 +27,7 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
 	const [selectedImageIndex, setSelectedImageIndex] = useState(0);
 	const [selectedVariant, setSelectedVariant] = useState<Product>(product);
 	const displayProduct = variants && variants.length > 1 ? selectedVariant : product;
+	const displayName = getShortProductName(displayProduct.name, 60);
 	const displayImages = displayProduct.images?.length ? displayProduct.images : [displayProduct.image];
 	const mainImageUrl = displayImages[selectedImageIndex] ?? displayProduct.image;
 
@@ -116,7 +117,7 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
                     <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative group">
                         <img
                             src={mainImageUrl}
-                            alt={displayProduct.name}
+                            alt={displayName}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
                         {displayProduct.price > 0 && displayProduct.inStock && (
@@ -150,7 +151,7 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
                         <span className="capitalize">{displayProduct.category}</span>
                     </nav>
 
-                    <h1 className="text-3xl md:text-4xl font-bold mb-2 text-gray-900 tracking-tight">{displayProduct.name}</h1>
+                    <h1 className="text-3xl md:text-4xl font-bold mb-2 text-gray-900 tracking-tight">{displayName}</h1>
                     
                     {/* Rating & Reviews */}
                     <div className="flex items-center gap-2 mb-6">
@@ -309,7 +310,7 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
             {/* Sticky Mobile Add to Cart */}
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 shadow-2xl md:hidden z-40 flex items-center gap-4 animate-slide-up">
                  <div className="hidden sm:block">
-                     <p className="font-bold text-sm truncate max-w-[150px]">{displayProduct.name}</p>
+                     <p className="font-bold text-sm truncate max-w-[150px]">{displayName}</p>
                      <p className="text-sm font-medium">{displayProduct.price.toFixed(2)} €</p>
                  </div>
                  <button

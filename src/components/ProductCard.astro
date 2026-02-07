@@ -1,11 +1,13 @@
 ---
 import type { Product } from '../types/product';
+import { getShortProductName } from '../lib/d1-products';
 
 interface Props {
 	product: Product;
 }
 
 const { product } = Astro.props;
+const displayName = getShortProductName(product.name);
 ---
 
 <div class="group">
@@ -14,7 +16,7 @@ const { product } = Astro.props;
         <a href={`/produkt/${product.id}`} class="block w-full h-full">
             <img
                 src={product.image}
-                alt={product.name}
+                alt={displayName}
                 loading="lazy"
                 width="400"
                 height="400"
@@ -38,7 +40,7 @@ const { product } = Astro.props;
     <div>
         <h3 class="text-sm font-medium text-gray-900 group-hover:underline decoration-1 underline-offset-4">
             <a href={`/produkt/${product.id}`}>
-                {product.name}
+                {displayName}
             </a>
         </h3>
         <div class="flex items-center gap-2 mt-1">

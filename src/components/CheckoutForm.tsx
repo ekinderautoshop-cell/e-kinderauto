@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Product } from '../types/product';
+import { getShortProductName } from '../lib/d1-products';
 
 interface CartItem {
 	product: Product;
@@ -55,11 +56,11 @@ export default function CheckoutForm() {
 						<div key={item.product.id} className="flex gap-4 border-b pb-4">
 							<img
 								src={item.product.image}
-								alt={item.product.name}
+								alt={getShortProductName(item.product.name)}
 								className="w-20 h-20 object-cover rounded"
 							/>
 							<div className="flex-1">
-								<h3 className="font-semibold">{item.product.name}</h3>
+								<h3 className="font-semibold">{getShortProductName(item.product.name)}</h3>
 								<p className="text-gray-600 text-sm">
 									Menge: {item.quantity} × {item.product.price.toFixed(2)} €
 								</p>

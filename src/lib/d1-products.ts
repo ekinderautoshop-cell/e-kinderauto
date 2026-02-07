@@ -142,6 +142,28 @@ export function getBaseProductName(product: Product): string {
 }
 
 /**
+ * Kürzt Produktnamen für die Anzeige in Karten/Listen.
+ * - Nutzt Modell in Anführungszeichen (z. B. "Lamborghini Huracan STO Drift") als Kurzname
+ * - Sonst: erster Teil vor " - " (z. B. "Elektro Kindermotorrad 888")
+ * - Entfernt Farb-Suffix, begrenzt Länge
+ */
+export function getShortProductName(fullName: string, maxLength = 52): string {
+	if (!fullName.trim()) return fullName;
+	let name = fullName.trim();
+	const colorSuffix = name.match(/\s+-\s*[A-Za-zäöüÄÖÜß0-9\s]+$/);
+	if (colorSuffix) name = name.slice(0, -colorSuffix[0].length).trim();
+	const quoted = name.match(/"([^"]+)"/);
+	if (quoted) {
+		name = quoted[1]!.trim();
+	} else {
+		const firstPart = name.split(/\s+-\s+/)[0];
+		name = (firstPart ?? name).trim();
+	}
+	if (name.length > maxLength) name = name.slice(0, maxLength - 1).trim() + '…';
+	return name;
+}
+
+/**
  * Gruppiert Produkte nach Basis-SKU (ein Eintrag pro Modell, Varianten zusammengefasst).
  * Gibt ein Repräsentanten-Produkt pro Gruppe zurück (Basis-SKU bevorzugt, sonst erste Variante).
  */

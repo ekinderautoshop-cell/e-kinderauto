@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Product } from '../types/product';
+import { getShortProductName } from '../lib/d1-products';
 
 interface CartItem {
 	product: Product;
@@ -147,14 +148,14 @@ export default function CartButton() {
 										<div className="w-24 h-24 bg-gray-50 rounded-lg overflow-hidden flex-shrink-0 border border-gray-100">
 											<img
 												src={item.product.image}
-												alt={item.product.name}
+												alt={getShortProductName(item.product.name)}
 												className="w-full h-full object-cover transition-transform group-hover:scale-105"
 											/>
 										</div>
 										<div className="flex-1 flex flex-col justify-between py-1">
 											<div>
                                                 <div className="flex justify-between items-start">
-												    <h3 className="font-bold text-sm text-gray-900 line-clamp-2">{item.product.name}</h3>
+												    <h3 className="font-bold text-sm text-gray-900 line-clamp-2">{getShortProductName(item.product.name)}</h3>
                                                     <button
 														onClick={() => removeFromCart(item.product.id)}
 														className="text-gray-400 hover:text-red-500 transition-colors ml-2"
