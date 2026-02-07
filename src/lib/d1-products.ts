@@ -63,13 +63,11 @@ function tryParseImages(images: string): string[] {
 }
 
 /**
- * Lädt alle Produkte aus D1 (mit Lagerbestand bevorzugt).
+ * Lädt alle Produkte aus D1 (ohne Filter, für Anzeige aller Artikel).
  */
-export async function getProductsFromD1(db: D1Database, limit = 100): Promise<Product[]> {
+export async function getProductsFromD1(db: D1Database, limit = 1000): Promise<Product[]> {
 	const stmt = db
-		.prepare(
-			'SELECT * FROM products WHERE (quantity IS NULL OR quantity > 0) ORDER BY updated_at DESC LIMIT ?'
-		)
+		.prepare('SELECT * FROM products ORDER BY updated_at DESC LIMIT ?')
 		.bind(limit);
 	const { results } = await stmt.all<D1ProductRow>();
 	return (results ?? []).map(mapD1RowToProduct);
