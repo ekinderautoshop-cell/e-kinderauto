@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import type { Product } from '../types/product';
+import { getBaseSku } from '../lib/d1-products';
 
 interface ProductDetailProps {
 	product: Product;
@@ -28,6 +29,9 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
 	const displayProduct = variants && variants.length > 1 ? selectedVariant : product;
 	const displayImages = displayProduct.images?.length ? displayProduct.images : [displayProduct.image];
 	const mainImageUrl = displayImages[selectedImageIndex] ?? displayProduct.image;
+
+	const baseSku = variants?.length ? getBaseSku(variants[0]!) : product.id;
+	const colorVariantsOnly = variants?.filter((v) => v.id !== baseSku) ?? [];
 
 	const handleVariantSelect = (v: Product) => {
 		setSelectedVariant(v);
@@ -187,12 +191,12 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
                         />
                     </div>
 
-                    {/* Farb-/Variantenauswahl wenn mehrere Varianten (z. B. Schwarz, Weiss) */}
-                    {variants && variants.length > 1 && (
+                    {/* Nur echte Farbvarianten (ohne Standardprodukt/Basis-SKU) */}
+                    {colorVariantsOnly.length > 0 && (
                         <div className="mb-6">
                             <span className="text-sm font-bold text-gray-900 mb-2 block">Farbe: <span className="font-normal text-gray-600">{displayProduct.color ?? displayProduct.name.split(' - ').pop()}</span></span>
                             <div className="flex flex-wrap gap-2">
-                                {variants.map((v) => (
+                                {colorVariantsOnly.map((v) => (
                                     <button
                                         key={v.id}
                                         type="button"
