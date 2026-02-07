@@ -11,3 +11,8 @@ database_id = "YOUR_D1_DATABASE_ID"
 
 [env.production]
 name = "e-kinderauto-shop"
+
+[[env.production.d1_databases]]
+binding = "DB"
+database_name = "e-kinderauto"
+database_id = "YOUR_D1_DATABASE_ID"
