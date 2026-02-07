@@ -177,8 +177,9 @@ export function getShortProductName(fullName: string, maxLength = 52): string {
 		const firstPart = name.split(/\s+-\s+/)[0];
 		name = (firstPart ?? name).trim();
 	}
-	const withoutKinderfahrzeug = name.replace(/^Kinderfahrzeug(\s*-\s*|\s+)/i, '').trim();
-	if (withoutKinderfahrzeug) name = withoutKinderfahrzeug;
+	const prefixRegex = /^(Elektro Kinderfahrzeug|Elektro Kindermotorrad|Kinderfahrzeug)(\s*-\s*|\s+)/i;
+	const withoutPrefix = name.replace(prefixRegex, '').trim();
+	if (withoutPrefix) name = withoutPrefix;
 	if (name.length > maxLength) name = name.slice(0, maxLength - 1).trim() + '…';
 	return name;
 }
