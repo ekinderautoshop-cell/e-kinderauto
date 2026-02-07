@@ -1,6 +1,6 @@
 ---
 import type { Product } from '../types/product';
-import { getShortProductName } from '../lib/d1-products';
+import { getShortProductName, formatShippingTime } from '../lib/d1-products';
 
 interface Props {
 	product: Product;
@@ -8,6 +8,7 @@ interface Props {
 
 const { product } = Astro.props;
 const displayName = getShortProductName(product.name);
+const lieferzeit = formatShippingTime(product.shippingTime);
 ---
 
 <div class="group">
@@ -53,6 +54,9 @@ const displayName = getShortProductName(product.name);
                 </p>
             )}
         </div>
+        <p class="text-xs text-gray-500 mt-1">
+            Lieferzeit: {lieferzeit}
+        </p>
     </div>
 </div>
 

@@ -1,22 +1,11 @@
 import { useState, useEffect } from 'react';
 import type { Product } from '../types/product';
-import { getBaseSku, getShortProductName } from '../lib/d1-products';
+import { getBaseSku, getShortProductName, formatShippingTime } from '../lib/d1-products';
 
 interface ProductDetailProps {
 	product: Product;
 	/** Alle Varianten (z. B. Farben) – wenn gesetzt, wird Farbauswahl angezeigt und nur ein Produkt repräsentiert. */
 	variants?: Product[];
-}
-
-/** Lieferzeit-String aus DB lesbar machen (z. B. "1-bis-3-tage" → "1–3 Werktage"). */
-function formatShippingTime(shippingTime: string | undefined): string {
-	if (!shippingTime) return '2–5 Werktage';
-	const t = shippingTime.toLowerCase().replace(/_/g, ' ');
-	if (t.includes('1') && t.includes('3')) return '1–3 Werktage';
-	if (t.includes('2') && t.includes('5')) return '2–5 Werktage';
-	if (t.includes('1') && t.includes('2')) return '1–2 Werktage';
-	if (t === 'sofort' || t.includes('sofort')) return 'Sofort versandfertig';
-	return t.replace(/-/g, ' ');
 }
 
 export default function ProductDetail({ product, variants }: ProductDetailProps) {

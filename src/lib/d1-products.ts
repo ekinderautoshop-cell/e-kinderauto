@@ -134,6 +134,24 @@ export function getBaseSku(product: Product): string {
 	return product.id.includes('-') ? product.id.split('-')[0]! : product.id;
 }
 
+/**
+ * Lieferzeit-String aus DB lesbar machen (z. B. "1-bis-3-tage" → "1–3 Werktage").
+ * Kann überall (Karten, Detail) genutzt werden.
+ */
+export function formatShippingTime(shippingTime: string | undefined): string {
+	if (!shippingTime?.trim()) return '2–5 Werktage';
+	const t = shippingTime.toLowerCase().trim().replace(/_/g, '-');
+	const bisMatch = t.match(/^(\d+)-bis-(\d+)-tage?$/);
+	if (bisMatch) return `${bisMatch[1]}–${bisMatch[2]} Werktage`;
+	const singleMatch = t.match(/^(\d+)-tage?$/);
+	if (singleMatch) return `${singleMatch[1]} Werktag${Number(singleMatch[1]) === 1 ? '' : 'e'}`;
+	if (t === 'sofort' || t.includes('sofort')) return 'Sofort versandfertig';
+	if (t.includes('1') && t.includes('3')) return '1–3 Werktage';
+	if (t.includes('2') && t.includes('5')) return '2–5 Werktage';
+	if (t.includes('1') && t.includes('2')) return '1–2 Werktage';
+	return t.replace(/-/g, ' ');
+}
+
 /** Entfernt Farb-/Varianten-Suffix aus dem Namen für die Gruppenanzeige. */
 export function getBaseProductName(product: Product): string {
 	if (!product.color) return product.name;
