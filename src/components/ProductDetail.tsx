@@ -144,9 +144,10 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                     </div>
 
                     <div className="border-t border-gray-100 py-6 mb-6">
-                        <p className="text-gray-600 leading-relaxed text-sm md:text-base">
-                            {product.description}
-                        </p>
+                        <div
+                            className="product-description text-gray-600 leading-relaxed text-sm md:text-base"
+                            dangerouslySetInnerHTML={{ __html: product.description || '' }}
+                        />
                     </div>
 
                     {/* Color/Variant Selection (Mock) */}
