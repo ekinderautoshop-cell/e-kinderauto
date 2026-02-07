@@ -7,14 +7,29 @@ import ProductCard from '../components/ProductCard.astro';
 import NewsletterModal from '../components/NewsletterModal';
 import { products as staticProducts } from '../data/products';
 import { getProductsFromD1 } from '../lib/d1-products';
-import { categories } from '../data/shop-content';
+import { categoryOrder, categoryToSlug } from '../data/shop-content';
 
 const db = Astro.locals.runtime?.env?.DB as import('../lib/d1-products').D1Database | undefined;
-const products = db ? await getProductsFromD1(db) : staticProducts;
-const allCategories = ['Alle', ...new Set(products.map(p => p.category).filter(Boolean))];
+const allProducts = db ? await getProductsFromD1(db) : staticProducts;
+
+const kategorieParam = Astro.url.searchParams.get('kategorie') ?? '';
+const products = kategorieParam
+	? allProducts.filter((p) => categoryToSlug(p.category) === kategorieParam)
+	: allProducts;
+
+const productCategoryNames = [...new Set(allProducts.map((p) => p.category).filter(Boolean))] as string[];
+const categoryNamesInOrder = categoryOrder.map((c) => c.name);
+const sortedCategories = productCategoryNames.sort((a, b) => {
+	const ai = categoryNamesInOrder.indexOf(a);
+	const bi = categoryNamesInOrder.indexOf(b);
+	if (ai === -1 && bi === -1) return a.localeCompare(b);
+	if (ai === -1) return 1;
+	if (bi === -1) return -1;
+	return ai - bi;
+});
 ---
 
-<Layout title="Alle Produkte - E-Kinderauto">
+<Layout title={kategorieParam ? `${sortedCategories.find(c => categoryToSlug(c) === kategorieParam) ?? 'Produkte'} - E-Kinderauto` : 'Alle Produkte - E-Kinderauto'}>
 	<Header />
     <NewsletterModal client:idle />
 	<main class="bg-white pb-20">
@@ -35,13 +50,22 @@ const allCategories = ['Alle', ...new Set(products.map(p => p.category).filter(B
                     <div>
                         <h3 class="font-bold text-lg mb-4">Kategorien</h3>
                         <ul class="space-y-2">
-                            {allCategories.map(cat => (
-                                <li>
-                                    <a href="#" class="text-gray-600 hover:text-black hover:underline decoration-1 underline-offset-4 transition-colors block py-1">
-                                        {cat}
-                                    </a>
-                                </li>
-                            ))}
+                            <li>
+                                <a href="/produkte" class={`block py-1 ${!kategorieParam ? 'font-semibold text-black' : 'text-gray-600 hover:text-black'} hover:underline decoration-1 underline-offset-4 transition-colors`}>
+                                    Alle
+                                </a>
+                            </li>
+                            {sortedCategories.map((cat) => {
+                                const slug = categoryToSlug(cat);
+                                const isActive = kategorieParam === slug;
+                                return (
+                                    <li>
+                                        <a href={`/produkte?kategorie=${encodeURIComponent(slug)}`} class={`block py-1 ${isActive ? 'font-semibold text-black' : 'text-gray-600 hover:text-black'} hover:underline decoration-1 underline-offset-4 transition-colors`}>
+                                            {cat}
+                                        </a>
+                                    </li>
+                                );
+                            })}
                         </ul>
                     </div>
 

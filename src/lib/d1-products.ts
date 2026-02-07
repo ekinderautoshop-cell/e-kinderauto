@@ -52,16 +52,34 @@ export function mapD1RowToProduct(row: D1ProductRow): Product {
 	const status = row.status?.toLowerCase();
 	const inStock = qty > 0 || status === 'instock';
 
+	const name = row.name ?? 'Unbekannt';
+	const shippingCost =
+		row.shipping_cost != null ? Math.round(row.shipping_cost * 100) / 100 : undefined;
+
 	return {
 		id: row.sku,
-		name: row.name ?? 'Unbekannt',
+		name,
 		description: normalizeDescriptionHtml(row.description ?? ''),
 		price: Math.round(price * 100) / 100,
 		image: mainImage,
 		images: allImages.length > 0 ? allImages : undefined,
 		category: row.category ?? '',
 		inStock,
+		shippingTime: row.shipping_time ?? undefined,
+		shippingCost,
+		color: parseColorFromName(name),
 	};
+}
+
+/** Versucht, die Farbe aus dem Produktnamen zu lesen (z. B. "... - Grau"). */
+function parseColorFromName(name: string): string | undefined {
+	const match = name.match(/\s+-\s+([A-Za-zäöüÄÖÜß0-9\s]+)$/);
+	if (!match) return undefined;
+	const part = match[1].trim();
+	if (!part) return undefined;
+	const lower = part.toLowerCase();
+	if (lower === 'l/r' || lower === 'l' || lower === 'r' || /^\d+$/.test(part)) return undefined;
+	return part;
 }
 
 /** JSON-Array von Bild-URLs parsen; verträgt ""-Escaping wie aus CSV/Export. */

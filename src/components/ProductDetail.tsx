@@ -5,11 +5,25 @@ interface ProductDetailProps {
 	product: Product;
 }
 
+/** Lieferzeit-String aus DB lesbar machen (z. B. "1-bis-3-tage" → "1–3 Werktage"). */
+function formatShippingTime(shippingTime: string | undefined): string {
+	if (!shippingTime) return '2–5 Werktage';
+	const t = shippingTime.toLowerCase().replace(/_/g, ' ');
+	if (t.includes('1') && t.includes('3')) return '1–3 Werktage';
+	if (t.includes('2') && t.includes('5')) return '2–5 Werktage';
+	if (t.includes('1') && t.includes('2')) return '1–2 Werktage';
+	if (t === 'sofort' || t.includes('sofort')) return 'Sofort versandfertig';
+	return t.replace(/-/g, ' ');
+}
+
 export default function ProductDetail({ product }: ProductDetailProps) {
 	const [quantity, setQuantity] = useState(1);
-    const [activeTab, setActiveTab] = useState('details');
-    const [timeLeft, setTimeLeft] = useState('');
-    const [viewers, setViewers] = useState(12);
+	const [activeTab, setActiveTab] = useState('details');
+	const [timeLeft, setTimeLeft] = useState('');
+	const [viewers, setViewers] = useState(12);
+	const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+	const displayImages = product.images?.length ? product.images : [product.image];
+	const mainImageUrl = displayImages[selectedImageIndex] ?? product.image;
 
     // Countdown Timer Logic
     useEffect(() => {
@@ -78,11 +92,11 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 	return (
 		<div className="relative">
             <div className="grid md:grid-cols-2 gap-12 lg:gap-16 pb-20">
-                {/* Gallery Section */}
+                {/* Gallery Section – klickbare Bildauswahl */}
                 <div className="space-y-4">
                     <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative group">
                         <img
-                            src={product.image}
+                            src={mainImageUrl}
                             alt={product.name}
                             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                         />
@@ -92,12 +106,17 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                             </div>
                         )}
                     </div>
-                    {(product.images?.length ?? 0) > 1 && (
+                    {displayImages.length > 1 && (
                         <div className="grid grid-cols-4 gap-4">
-                            {product.images!.slice(0, 4).map((src, i) => (
-                                <div key={i} className={`aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 ${i === 0 ? 'border-black' : 'border-transparent hover:border-gray-300'} transition-all`}>
+                            {displayImages.slice(0, 8).map((src, i) => (
+                                <button
+                                    key={i}
+                                    type="button"
+                                    onClick={() => setSelectedImageIndex(i)}
+                                    className={`aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer border-2 transition-all ${selectedImageIndex === i ? 'border-black ring-1 ring-black' : 'border-transparent hover:border-gray-300'}`}
+                                >
                                     <img src={src} alt="" className="w-full h-full object-cover" />
-                                </div>
+                                </button>
                             ))}
                         </div>
                     )}
@@ -153,15 +172,14 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                         />
                     </div>
 
-                    {/* Color/Variant Selection (Mock) */}
-                    <div className="mb-6">
-                        <span className="text-sm font-bold text-gray-900 mb-2 block">Farbe: <span className="font-normal text-gray-600">Rot</span></span>
-                        <div className="flex gap-2">
-                             <button className="w-8 h-8 rounded-full bg-red-600 ring-2 ring-offset-2 ring-black cursor-pointer"></button>
-                             <button className="w-8 h-8 rounded-full bg-black border border-gray-200 cursor-pointer hover:ring-2 ring-offset-2 ring-gray-300"></button>
-                             <button className="w-8 h-8 rounded-full bg-white border border-gray-200 cursor-pointer hover:ring-2 ring-offset-2 ring-gray-300"></button>
+                    {/* Farbe nur anzeigen, wenn aus Name/DB vorhanden */}
+                    {product.color && (
+                        <div className="mb-6">
+                            <span className="text-sm font-bold text-gray-900 mb-2 block">
+                                Farbe: <span className="font-normal text-gray-600">{product.color}</span>
+                            </span>
                         </div>
-                    </div>
+                    )}
 
                     <div className="space-y-6">
                         {/* Quantity & Add to Cart */}
@@ -237,8 +255,14 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                                     </ul>
                                 ) : (
                                     <div>
-                                        <p className="mb-2">Kostenloser Versand mit DHL/DPD.</p>
-                                        <p>Lieferzeit: 1-3 Werktage innerhalb Deutschlands.</p>
+                                        <p className="mb-2">
+                                            <strong>Lieferzeit:</strong> {formatShippingTime(product.shippingTime)} (innerhalb Deutschlands).
+                                        </p>
+                                        <p className="mb-2">
+                                            {product.shippingCost != null && product.shippingCost > 0
+                                                ? `Versandkosten: ${product.shippingCost.toFixed(2)} €`
+                                                : 'Kostenloser Versand mit DHL/DPD ab 50 € Bestellwert.'}
+                                        </p>
                                         <p className="mt-2">30 Tage Rückgaberecht. Kostenloser Rückversand.</p>
                                     </div>
                                 )}

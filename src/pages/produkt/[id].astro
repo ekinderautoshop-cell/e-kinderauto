@@ -12,6 +12,11 @@ if (!sku) return Astro.redirect('/produkte');
 
 const db = Astro.locals.runtime?.env?.DB as import('../../lib/d1-products').D1Database | undefined;
 let product = db ? await getProductBySkuFromD1(db, sku) : staticProducts.find((p) => p.id === sku) ?? null;
+if (!product && db && sku.includes('-')) {
+	const baseSku = sku.split('-')[0];
+	if (baseSku) product = await getProductBySkuFromD1(db, baseSku);
+}
+if (!product && !db) product = staticProducts.find((p) => p.id === sku || p.id === sku.split('-')[0]) ?? null;
 
 if (!product) return Astro.redirect('/produkte');
 ---
