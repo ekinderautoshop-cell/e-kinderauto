@@ -13,14 +13,14 @@ const lieferzeit = formatShippingTime(product.shippingTime);
 
 <div class="group">
     {/* Image Container */}
-    <div class="relative aspect-square bg-gray-100 mb-4 overflow-hidden rounded-sm">
+    <div class="relative aspect-[4/3] bg-gray-100 mb-4 overflow-hidden rounded-sm">
         <a href={`/produkt/${product.id}`} class="block w-full h-full">
             <img
                 src={product.image}
                 alt={displayName}
                 loading="lazy"
                 width="400"
-                height="400"
+                height="300"
                 class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
             />
         </a>

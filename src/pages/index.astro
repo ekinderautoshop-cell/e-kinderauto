@@ -106,7 +106,7 @@ const products = groupProductsByBase(rawProducts).slice(0, 24);
                     </a>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
                     {products.map((product) => (
                         <ProductCard product={product} />
                     ))}
