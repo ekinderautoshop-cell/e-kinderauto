@@ -6,11 +6,13 @@ import Header from '../../components/Header.astro';
 import ProductDetail from '../../components/ProductDetail';
 import { getProductVariantsByBaseSku, getBaseSku, getShortProductName } from '../../lib/d1-products';
 import { stripMitLizenz } from '../../data/shop-content';
+import { extractProductIdFromSlug } from '../../lib/product-url';
 import { products as staticProducts } from '../../data/products';
 
-const sku = Astro.params.id;
-if (!sku) return Astro.redirect('/produkte');
+const slugParam = Astro.params.slug;
+if (!slugParam) return Astro.redirect('/produkte');
 
+const sku = extractProductIdFromSlug(slugParam);
 const baseSku = sku.includes('-') ? sku.split('-')[0]! : sku;
 const db = Astro.locals.runtime?.env?.DB as import('../../lib/d1-products').D1Database | undefined;
 
@@ -25,12 +27,15 @@ if (variants.length === 0 && !db) {
 if (variants.length === 0) return Astro.redirect('/produkte');
 
 const product = variants.find((v) => v.id === sku) ?? variants[0]!;
+
+const metaTitle = `${getShortProductName(stripMitLizenz(product.name))} - E-Kinderauto`;
+const rawDesc = (product.description || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+const metaDescription = rawDesc ? (rawDesc.length > 160 ? rawDesc.slice(0, 157) + '…' : rawDesc) : `${getShortProductName(stripMitLizenz(product.name))} im E-Kinderauto Shop. Jetzt entdecken.`;
 ---
 
-<Layout title={`${getShortProductName(stripMitLizenz(product.name))} - E-Kinderauto Shop`}>
+<Layout title={metaTitle} description={metaDescription}>
 	<Header />
 	<main class="container mx-auto px-4 py-8">
 		<ProductDetail product={product} variants={variants.length > 1 ? variants : undefined} client:load />
 	</main>
 </Layout>
-

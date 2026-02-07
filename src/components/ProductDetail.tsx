@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Product } from '../types/product';
 import { getBaseSku, getShortProductName, formatShippingTime } from '../lib/d1-products';
 import { getCategoryDisplayName, stripMitLizenz } from '../data/shop-content';
+import { getProductUrl } from '../lib/product-url';
 
 interface ProductDetailProps {
 	product: Product;
@@ -44,7 +45,7 @@ export default function ProductDetail({ product, variants }: ProductDetailProps)
 	const handleVariantSelect = (v: Product) => {
 		setSelectedVariant(v);
 		setSelectedImageIndex(0);
-		if (typeof window !== 'undefined') window.history.replaceState({}, '', `/produkt/${v.id}`);
+		if (typeof window !== 'undefined') window.history.replaceState({}, '', getProductUrl(v));
 	};
 
     // Countdown Timer Logic

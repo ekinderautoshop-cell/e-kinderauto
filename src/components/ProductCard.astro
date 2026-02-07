@@ -2,6 +2,7 @@
 import type { Product } from '../types/product';
 import { getShortProductName, formatShippingTime } from '../lib/d1-products';
 import { stripMitLizenz } from '../data/shop-content';
+import { getProductUrl } from '../lib/product-url';
 
 interface Props {
 	product: Product;
@@ -15,7 +16,7 @@ const lieferzeit = formatShippingTime(product.shippingTime);
 <div class="group relative overflow-hidden rounded-sm {!product.inStock ? 'opacity-75' : ''}">
     {/* Image Container */}
     <div class="relative aspect-[4/3] bg-gray-100 mb-4 overflow-hidden rounded-sm {!product.inStock ? 'grayscale' : ''}">
-        <a href={`/produkt/${product.id}`} class="block w-full h-full">
+        <a href={getProductUrl(product)} class="block w-full h-full">
             <img
                 src={product.image}
                 alt={displayName}
@@ -41,7 +42,7 @@ const lieferzeit = formatShippingTime(product.shippingTime);
     {/* Product Info */}
     <div class={!product.inStock ? 'text-gray-500' : ''}>
         <h3 class="text-sm font-medium text-gray-900 group-hover:underline decoration-1 underline-offset-4 {!product.inStock ? '!text-gray-500' : ''}">
-            <a href={`/produkt/${product.id}`}>
+            <a href={getProductUrl(product)}>
                 {displayName}
             </a>
         </h3>
