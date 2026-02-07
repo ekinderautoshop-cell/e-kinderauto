@@ -59,6 +59,36 @@ export const categories = [
     }
 ];
 
+/** Bilder pro Kategorie-Slug für die Kategorien-Unterseite (fehlende = Platzhalter). */
+const categoryImageBySlug: Record<string, string> = {
+    'kinderfahrzeuge': 'https://images.unsplash.com/photo-1532906619279-a764d0263f4e?q=80&w=800&auto=format&fit=crop',
+    'rc-panzer-und-militaer': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=800&auto=format&fit=crop',
+    'baufahrzeuge': 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800&auto=format&fit=crop',
+    'elektro-kinderfahrzeuge-oldtimer': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=800&auto=format&fit=crop',
+    'elektro-kinderfahrzeuge-mit-lizenz': 'https://images.unsplash.com/photo-1532906619279-a764d0263f4e?q=80&w=800&auto=format&fit=crop',
+    'polizei-feuerwehr': 'https://images.unsplash.com/photo-1581092160562-40aa08e78837?q=80&w=800&auto=format&fit=crop',
+    'xxl-fahrzeuge': 'https://images.unsplash.com/photo-1532906619279-a764d0263f4e?q=80&w=800&auto=format&fit=crop',
+    'elektro-kindermotorraeder': 'https://images.unsplash.com/photo-1558981806-ec527fa84f3d?q=80&w=800&auto=format&fit=crop',
+    'e-scooters-und-quads': 'https://images.unsplash.com/photo-1558981806-ec527fa84f3d?q=80&w=800&auto=format&fit=crop',
+    '2-sitzer-coco': 'https://images.unsplash.com/photo-1532906619279-a764d0263f4e?q=80&w=800&auto=format&fit=crop',
+    'rc-modellbau': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=800&auto=format&fit=crop',
+    'elektronik': 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?q=80&w=800&auto=format&fit=crop',
+    'kleine-e-scooter': 'https://images.unsplash.com/photo-1558981806-ec527fa84f3d?q=80&w=800&auto=format&fit=crop',
+    'e-scooters-und-e-bikes': 'https://images.unsplash.com/photo-1558981806-ec527fa84f3d?q=80&w=800&auto=format&fit=crop',
+    'coco-bikes--chopper': 'https://images.unsplash.com/photo-1558981806-ec527fa84f3d?q=80&w=800&auto=format&fit=crop',
+    'e-scooter-dezent': 'https://images.unsplash.com/photo-1558981806-ec527fa84f3d?q=80&w=800&auto=format&fit=crop',
+};
+
+const DEFAULT_CATEGORY_IMAGE = 'https://images.unsplash.com/photo-1532906619279-a764d0263f4e?q=80&w=800&auto=format&fit=crop';
+
+/** Alle Kategorien mit Bild für die Kategorien-Unterseite. */
+export const categoriesWithImages = categoryOrder.map((c) => ({
+    name: c.name,
+    slug: c.slug,
+    image: categoryImageBySlug[c.slug] ?? DEFAULT_CATEGORY_IMAGE,
+    url: `/produkte?kategorie=${encodeURIComponent(c.slug)}`,
+}));
+
 export const testimonials = [
     {
         id: 1,

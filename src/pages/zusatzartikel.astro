@@ -7,11 +7,11 @@ import ProductCard from '../components/ProductCard.astro';
 import NewsletterModal from '../components/NewsletterModal';
 import { products as staticProducts } from '../data/products';
 import { getProductsFromD1 } from '../lib/d1-products';
-import { groupProductsByBase, isShortNameSingleWord, isZusatzartikelProduct } from '../lib/d1-products';
+import { groupProductsByBase, isShortNameSingleWord, isZusatzartikelProduct, isErsatzteilProduct } from '../lib/d1-products';
 
 const db = Astro.locals.runtime?.env?.DB as import('../lib/d1-products').D1Database | undefined;
 const allFromDb = db ? await getProductsFromD1(db) : staticProducts;
-const zusatzRaw = allFromDb.filter((p) => isZusatzartikelProduct(p.name));
+const zusatzRaw = allFromDb.filter((p) => isZusatzartikelProduct(p.name) || isErsatzteilProduct(p.name));
 const grouped = groupProductsByBase(zusatzRaw);
 const products = grouped.filter((p) => !isShortNameSingleWord(p.name));
 ---
@@ -24,7 +24,7 @@ const products = grouped.filter((p) => !isShortNameSingleWord(p.name));
 			<div class="container mx-auto px-6 md:px-12 text-center">
 				<h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Zusatzartikel</h1>
 				<p class="text-gray-500 max-w-2xl mx-auto text-lg">
-					Hauptplatinen, Fahrtenregler, Rauchmodule, Ladegeräte und weiteres Zubehör.
+					Ersatzteile, Hauptplatinen, Fahrtenregler, Rauchmodule, Ladegeräte und weiteres Zubehör.
 				</p>
 			</div>
 		</div>
