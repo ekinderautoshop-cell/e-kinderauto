@@ -7,7 +7,7 @@ import ProductCard from '../components/ProductCard.astro';
 import NewsletterModal from '../components/NewsletterModal';
 import { products as staticProducts } from '../data/products';
 import { getProductsFromD1 } from '../lib/d1-products';
-import { categoryOrder, categoryToSlug, ALLOWED_CATEGORY_NAMES, getRandomProductImageFromCategory } from '../data/shop-content';
+import { categoryOrder, categoryToSlug, ALLOWED_CATEGORY_NAMES } from '../data/shop-content';
 import { groupProductsByBase, isShortNameSingleWord, isErsatzteilProduct, isZusatzartikelProduct } from '../lib/d1-products';
 
 const db = Astro.locals.runtime?.env?.DB as import('../lib/d1-products').D1Database | undefined;
@@ -121,10 +121,7 @@ const sortedCategories = productCategoryNames.sort((a, b) => {
 
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
                         {products.map((product) => (
-                            <ProductCard
-                                product={product}
-                                backgroundImage={getRandomProductImageFromCategory(product.category, allProductsRaw, product.id)}
-                            />
+                            <ProductCard product={product} />
                         ))}
                     </div>
 

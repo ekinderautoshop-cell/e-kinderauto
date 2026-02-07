@@ -6,7 +6,7 @@ import Header from '../components/Header.astro';
 import ProductCard from '../components/ProductCard.astro';
 import { products as staticProducts } from '../data/products';
 import { getProductsFromD1, groupProductsByBase, isShortNameSingleWord, isErsatzteilProduct, isZusatzartikelProduct } from '../lib/d1-products';
-import { categories, testimonials, ALLOWED_CATEGORY_NAMES, getRandomProductImageFromCategory } from '../data/shop-content';
+import { categories, testimonials, ALLOWED_CATEGORY_NAMES } from '../data/shop-content';
 import NewsletterModal from '../components/NewsletterModal';
 import FaqSection from '../components/FaqSection';
 
@@ -119,10 +119,7 @@ const products = shuffled.slice(0, 24);
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
                     {products.map((product) => (
-                        <ProductCard
-                            product={product}
-                            backgroundImage={getRandomProductImageFromCategory(product.category, rawProducts, product.id)}
-                        />
+                        <ProductCard product={product} />
                     ))}
                 </div>
                 

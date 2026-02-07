@@ -6,7 +6,6 @@ import Header from '../components/Header.astro';
 import ProductCard from '../components/ProductCard.astro';
 import NewsletterModal from '../components/NewsletterModal';
 import { products as staticProducts } from '../data/products';
-import { getRandomProductImageFromCategory } from '../data/shop-content';
 import { getProductsFromD1 } from '../lib/d1-products';
 import { groupProductsByBase, isShortNameSingleWord, isZusatzartikelProduct, isErsatzteilProduct } from '../lib/d1-products';
 
@@ -37,10 +36,7 @@ const products = grouped.filter((p) => !isShortNameSingleWord(p.name));
 
 			<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
 				{products.map((product) => (
-					<ProductCard
-						product={product}
-						backgroundImage={getRandomProductImageFromCategory(product.category, allFromDb, product.id)}
-					/>
+					<ProductCard product={product} />
 				))}
 			</div>
 
