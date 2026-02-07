@@ -5,32 +5,46 @@ import Layout from '../../layouts/Layout.astro';
 import Header from '../../components/Header.astro';
 import ProductDetail from '../../components/ProductDetail';
 import { getProductVariantsByBaseSku, getBaseSku, getShortProductName } from '../../lib/d1-products';
+import { getProductsFromD1 } from '../../lib/d1-products';
+import { isErsatzteilProduct, isZusatzartikelProduct } from '../../lib/d1-products';
 import { stripMitLizenz } from '../../data/shop-content';
-import { extractProductIdFromSlug } from '../../lib/product-url';
+import { ALLOWED_CATEGORY_NAMES } from '../../data/shop-content';
+import { getProductSlug } from '../../lib/product-url';
 import { products as staticProducts } from '../../data/products';
 
 const slugParam = Astro.params.slug;
 if (!slugParam) return Astro.redirect('/produkte');
 
-const sku = extractProductIdFromSlug(slugParam);
-const baseSku = sku.includes('-') ? sku.split('-')[0]! : sku;
 const db = Astro.locals.runtime?.env?.DB as import('../../lib/d1-products').D1Database | undefined;
+const allowedSet = new Set(ALLOWED_CATEGORY_NAMES);
+const allRaw = db ? await getProductsFromD1(db) : staticProducts;
+const allProducts = allRaw.filter(
+	(p) =>
+		p.category &&
+		allowedSet.has(p.category) &&
+		!isErsatzteilProduct(p.name) &&
+		!isZusatzartikelProduct(p.name)
+);
+
+const matches = allProducts.filter((p) => getProductSlug(p) === slugParam);
+if (matches.length === 0) return Astro.redirect('/produkte');
+
+const product = matches[0]!;
+const baseSku = getBaseSku(product);
 
 let variants: import('../../types/product').Product[] = [];
 if (db) {
 	variants = await getProductVariantsByBaseSku(db, baseSku);
+} else {
+	variants = staticProducts.filter((p) => getBaseSku(p) === baseSku);
 }
-if (variants.length === 0 && !db) {
-	const single = staticProducts.find((p) => p.id === sku || getBaseSku(p) === baseSku) ?? null;
-	if (single) variants = [single];
-}
-if (variants.length === 0) return Astro.redirect('/produkte');
-
-const product = variants.find((v) => v.id === sku) ?? variants[0]!;
+if (variants.length === 0) variants = [product];
 
 const metaTitle = `${getShortProductName(stripMitLizenz(product.name))} - E-Kinderauto`;
 const rawDesc = (product.description || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
-const metaDescription = rawDesc ? (rawDesc.length > 160 ? rawDesc.slice(0, 157) + '…' : rawDesc) : `${getShortProductName(stripMitLizenz(product.name))} im E-Kinderauto Shop. Jetzt entdecken.`;
+const metaDescription = rawDesc
+	? (rawDesc.length > 320 ? rawDesc.slice(0, 317) + '…' : rawDesc)
+	: `${getShortProductName(stripMitLizenz(product.name))} im E-Kinderauto Shop. Jetzt entdecken.`;
 ---
 
 <Layout title={metaTitle} description={metaDescription}>
