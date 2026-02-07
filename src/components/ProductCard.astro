@@ -5,19 +5,21 @@ import { getCategoryImageUrl } from '../data/shop-content';
 
 interface Props {
 	product: Product;
+	/** Optional: Hintergrundbild (z. B. zufälliges Produktbild aus der Kategorie). Fehlt es, wird das Kategoriebild genutzt. */
+	backgroundImage?: string;
 }
 
-const { product } = Astro.props;
+const { product, backgroundImage } = Astro.props;
 const displayName = getShortProductName(product.name);
 const lieferzeit = formatShippingTime(product.shippingTime);
-const categoryBgImage = getCategoryImageUrl(product.category);
+const bgImage = backgroundImage ?? getCategoryImageUrl(product.category);
 ---
 
 <div class="group relative overflow-hidden rounded-sm {!product.inStock ? 'opacity-75' : ''}">
-    {/* Kategorie-Hintergrundbild hinter der Karte */}
+    {/* Hintergrundbild hinter der Karte (Produktbild aus Kategorie oder Kategoriebild) */}
     <div
         class="absolute inset-0 bg-cover bg-center scale-105 opacity-[0.12] pointer-events-none"
-        style={`background-image: url(${categoryBgImage});`}
+        style={`background-image: url(${bgImage});`}
         aria-hidden="true"
     />
     {/* Image Container */}

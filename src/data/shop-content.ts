@@ -87,6 +87,33 @@ export function getCategoryImageUrl(categoryName: string): string {
     return categoryImageBySlug[slug] ?? DEFAULT_CATEGORY_IMAGE;
 }
 
+/** Einfacher Hash für deterministische Auswahl (gleiche Karte = gleicher Hintergrund). */
+function simpleHash(str: string): number {
+    let h = 0;
+    for (let i = 0; i < str.length; i++) h = ((h << 5) - h + str.charCodeAt(i)) | 0;
+    return Math.abs(h);
+}
+
+/**
+ * Liefert die Bild-URL eines zufälligen (deterministisch gewählten) Produkts aus derselben Kategorie.
+ * Das aktuelle Produkt wird ausgeschlossen. Fallback: Kategorie-Platzhalterbild.
+ */
+export function getRandomProductImageFromCategory(
+    categoryName: string,
+    allProducts: import('../types/product').Product[],
+    excludeProductId?: string
+): string {
+    const withImage = allProducts.filter(
+        (p) =>
+            p.category === categoryName &&
+            p.image?.trim() &&
+            p.id !== excludeProductId
+    );
+    if (withImage.length === 0) return getCategoryImageUrl(categoryName);
+    const index = simpleHash(excludeProductId ?? categoryName) % withImage.length;
+    return withImage[index].image;
+}
+
 /** Alle Kategorien mit Bild für die Kategorien-Unterseite. */
 export const categoriesWithImages = categoryOrder.map((c) => ({
     name: c.name,
