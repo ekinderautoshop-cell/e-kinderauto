@@ -1,6 +1,0 @@
-name = "e-kinderauto-shop"
-compatibility_date = "2024-01-01"
-pages_build_output_dir = "dist"
-
-# D1-Binding "DB" wird im Cloudflare-Pages-Dashboard gesetzt (Settings > Functions > D1).
-# Für lokales Dev (wrangler pages dev): hier [[d1_databases]] mit echter database_id eintragen.
