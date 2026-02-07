@@ -145,7 +145,7 @@ export function getBaseProductName(product: Product): string {
  * Kürzt Produktnamen für die Anzeige in Karten/Listen.
  * - Nutzt Modell in Anführungszeichen (z. B. "Lamborghini Huracan STO Drift") als Kurzname
  * - Sonst: erster Teil vor " - " (z. B. "Elektro Kindermotorrad 888")
- * - Entfernt Farb-Suffix, begrenzt Länge
+ * - Entfernt Farb-Suffix, streicht "Kinderfahrzeug" am Anfang, begrenzt Länge
  */
 export function getShortProductName(fullName: string, maxLength = 52): string {
 	if (!fullName.trim()) return fullName;
@@ -159,6 +159,8 @@ export function getShortProductName(fullName: string, maxLength = 52): string {
 		const firstPart = name.split(/\s+-\s+/)[0];
 		name = (firstPart ?? name).trim();
 	}
+	const withoutKinderfahrzeug = name.replace(/^Kinderfahrzeug(\s*-\s*|\s+)/i, '').trim();
+	if (withoutKinderfahrzeug) name = withoutKinderfahrzeug;
 	if (name.length > maxLength) name = name.slice(0, maxLength - 1).trim() + '…';
 	return name;
 }
