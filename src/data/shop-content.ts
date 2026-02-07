@@ -10,7 +10,6 @@ export const ALLOWED_CATEGORY_NAMES = [
     'Elektro Kindermotorräder',
     'E-Scooters und Quads',
     '2 Sitzer Coco',
-    'Outdoor Spielzeuge',
     'RC Modellbau',
     'Elektronik',
     'Kleine E-Scooter',

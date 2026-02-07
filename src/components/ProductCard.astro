@@ -21,7 +21,7 @@ const lieferzeit = formatShippingTime(product.shippingTime);
                 loading="lazy"
                 width="400"
                 height="300"
-                class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                class="w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 {!product.inStock ? 'opacity-70' : ''}"
             />
         </a>
         {/* Badges */}
