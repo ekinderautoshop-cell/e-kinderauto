@@ -59,9 +59,11 @@ export async function trackBrevoEvent(params: {
 			'api-key': apiKey,
 		},
 		body: JSON.stringify({
-			event,
-			email,
-			properties: properties ?? {},
+			event_name: event,
+			identifiers: {
+				email_id: email,
+			},
+			event_properties: properties ?? {},
 		}),
 	});
 
