@@ -144,18 +144,23 @@ async function handleCheckoutCompleted(
 		});
 	}
 
-	await upsertBrevoContact({
-		apiKey: brevoApiKey,
-		email,
-		attributes: {
-			FIRSTNAME: firstName,
-			LASTNAME: lastName,
-			ORDER_STATUS: 'paid',
-			LAST_ORDER_ID: orderId,
-			LAST_ORDER_TOTAL: orderTotal,
-			CURRENCY: currency,
-		},
-	});
+	try {
+		await upsertBrevoContact({
+			apiKey: brevoApiKey,
+			email,
+			listIds: [3],
+			attributes: {
+				FIRSTNAME: firstName,
+				LASTNAME: lastName,
+				ORDER_STATUS: 'paid',
+				LAST_ORDER_ID: orderId,
+				LAST_ORDER_TOTAL: orderTotal,
+				CURRENCY: currency,
+			},
+		});
+	} catch (err) {
+		console.error('Brevo upsert failed (checkout.session.completed):', err);
+	}
 
 	await trackBrevoEvent({
 		apiKey: brevoApiKey,
@@ -168,6 +173,7 @@ async function handleCheckoutCompleted(
 			currency,
 			items_count: orderItems.length,
 			items: productNames,
+			brevo_list_id: 3,
 		},
 	});
 }
@@ -192,14 +198,19 @@ async function handlePaymentFailed(
 		});
 	}
 
-	await upsertBrevoContact({
-		apiKey: brevoApiKey,
-		email,
-		attributes: {
-			ORDER_STATUS: 'payment_failed',
-			CURRENCY: currency,
-		},
-	});
+	try {
+		await upsertBrevoContact({
+			apiKey: brevoApiKey,
+			email,
+			listIds: [3],
+			attributes: {
+				ORDER_STATUS: 'payment_failed',
+				CURRENCY: currency,
+			},
+		});
+	} catch (err) {
+		console.error('Brevo upsert failed (payment_intent.payment_failed):', err);
+	}
 
 	await trackBrevoEvent({
 		apiKey: brevoApiKey,
@@ -234,14 +245,19 @@ async function handleChargeRefunded(
 		});
 	}
 
-	await upsertBrevoContact({
-		apiKey: brevoApiKey,
-		email,
-		attributes: {
-			ORDER_STATUS: 'refunded',
-			CURRENCY: currency,
-		},
-	});
+	try {
+		await upsertBrevoContact({
+			apiKey: brevoApiKey,
+			email,
+			listIds: [3],
+			attributes: {
+				ORDER_STATUS: 'refunded',
+				CURRENCY: currency,
+			},
+		});
+	} catch (err) {
+		console.error('Brevo upsert failed (charge.refunded):', err);
+	}
 
 	await trackBrevoEvent({
 		apiKey: brevoApiKey,

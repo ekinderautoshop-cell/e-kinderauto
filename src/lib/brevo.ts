@@ -13,8 +13,9 @@ export async function upsertBrevoContact(params: {
 	apiKey: string;
 	email: string;
 	attributes?: BrevoContactAttributes;
+	listIds?: number[];
 }): Promise<void> {
-	const { apiKey, email, attributes } = params;
+	const { apiKey, email, attributes, listIds } = params;
 	const createRequest = (payloadAttributes?: BrevoContactAttributes) =>
 		fetch(`${BREVO_API_BASE}/contacts`, {
 			method: 'POST',
@@ -25,6 +26,7 @@ export async function upsertBrevoContact(params: {
 			body: JSON.stringify({
 				email,
 				updateEnabled: true,
+				...(listIds && listIds.length > 0 ? { listIds } : {}),
 				...(payloadAttributes ? { attributes: payloadAttributes } : {}),
 			}),
 		});
