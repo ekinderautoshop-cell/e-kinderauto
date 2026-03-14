@@ -1,7 +1,12 @@
 ---
+export const prerender = false;
+
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import CheckoutForm from '../components/CheckoutForm';
+
+const { isAuthenticated, redirectToSignIn } = Astro.locals.auth();
+if (!isAuthenticated) return redirectToSignIn();
 ---
 
 <Layout title="Kasse - E-Kinderauto Shop">
