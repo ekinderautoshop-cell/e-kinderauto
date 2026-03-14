@@ -25,11 +25,13 @@ const grouped = groupProductsByBase(rawProducts).filter((p) => !isShortNameSingl
 const shuffled = [...grouped].sort(() => Math.random() - 0.5);
 const products = shuffled.slice(0, 24);
 
-const homepageCategories = categoriesWithImages.map((cat) => ({
+const allMappedCategories = categoriesWithImages.map((cat) => ({
 	...cat,
-	image: getRandomProductImageFromCategory(cat.name, rawProducts) || cat.image,
+	image: getRandomProductImageFromCategory(cat.name, rawProducts),
 	displayName: getCategoryDisplayName(cat.name),
 }));
+const withImage = allMappedCategories.filter((cat) => cat.image?.trim());
+const homepageCategories = [...withImage].sort(() => Math.random() - 0.5).slice(0, 4);
 ---
 
 <Layout title="E-Kinderauto - Premium Kinderfahrzeuge">
