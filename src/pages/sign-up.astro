@@ -3,6 +3,9 @@ export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
+
+const runtime = Astro.locals.runtime;
+const clerkPk = runtime?.env?.PUBLIC_CLERK_PUBLISHABLE_KEY ?? import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY ?? '';
 ---
 
 <Layout title="Registrieren - E-Kinderauto">
@@ -11,18 +14,27 @@ import Header from '../components/Header.astro';
 		<div class="max-w-md mx-auto text-center">
 			<h1 class="text-3xl font-bold mb-6">Registrieren</h1>
 			<div id="clerk-sign-up"></div>
+			<p id="clerk-loading" class="text-gray-400 text-sm mt-4">Lade Registrierung...</p>
 		</div>
 	</main>
 </Layout>
 
-<script is:inline define:vars={{ clerkPk: import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY }}>
+<script is:inline define:vars={{ clerkPk }}>
 	async function loadClerk() {
-		const pk = clerkPk || document.querySelector('meta[name="clerk-publishable-key"]')?.content;
-		if (!pk) return;
-		const Clerk = (await import('https://esm.sh/@clerk/clerk-js@latest')).default;
-		const clerk = new Clerk(pk);
-		await clerk.load();
-		clerk.mountSignUp(document.getElementById('clerk-sign-up'));
+		if (!clerkPk) {
+			document.getElementById('clerk-loading').textContent = 'Registrierung ist aktuell nicht verfügbar.';
+			return;
+		}
+		try {
+			const { default: Clerk } = await import('https://esm.sh/@clerk/clerk-js@5');
+			const clerk = new Clerk(clerkPk);
+			await clerk.load();
+			document.getElementById('clerk-loading').style.display = 'none';
+			clerk.mountSignUp(document.getElementById('clerk-sign-up'));
+		} catch (e) {
+			console.error('Clerk load error:', e);
+			document.getElementById('clerk-loading').textContent = 'Fehler beim Laden der Registrierung.';
+		}
 	}
 	loadClerk();
 </script>
