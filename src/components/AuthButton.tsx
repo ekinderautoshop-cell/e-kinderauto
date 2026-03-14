@@ -9,6 +9,7 @@ interface Props {
 export default function AuthButton({ supabaseUrl, supabaseKey }: Props) {
 	const [loggedIn, setLoggedIn] = useState(false);
 	const [checked, setChecked] = useState(false);
+	const [initials, setInitials] = useState('');
 
 	useEffect(() => {
 		const supabase = getSupabaseClient({ PUBLIC_SUPABASE_URL: supabaseUrl, PUBLIC_SUPABASE_ANON_KEY: supabaseKey });
@@ -18,6 +19,15 @@ export default function AuthButton({ supabaseUrl, supabaseKey }: Props) {
 		}
 		supabase.auth.getUser().then(({ data }) => {
 			setLoggedIn(!!data.user);
+			if (data.user) {
+				const name = data.user.user_metadata?.full_name || data.user.email || '';
+				const parts = name.trim().split(/\s+/);
+				setInitials(
+					parts.length >= 2
+						? (parts[0][0] + parts[parts.length - 1][0]).toUpperCase()
+						: name.slice(0, 2).toUpperCase()
+				);
+			}
 			setChecked(true);
 		});
 	}, []);
@@ -31,9 +41,9 @@ export default function AuthButton({ supabaseUrl, supabaseKey }: Props) {
 			aria-label={loggedIn ? 'Mein Konto' : 'Anmelden'}
 		>
 			{loggedIn ? (
-				<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-					<path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
-				</svg>
+				<span className="w-8 h-8 rounded-full bg-black text-white text-xs font-semibold flex items-center justify-center">
+					{initials || '?'}
+				</span>
 			) : (
 				<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
 					<path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />

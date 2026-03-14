@@ -71,13 +71,20 @@ export default function AccountDashboard({ supabaseUrl, supabaseKey }: Props) {
 			{/* Welcome */}
 			<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8 mb-6">
 				<div className="flex items-center justify-between flex-wrap gap-4">
-					<div>
-						<h1 className="text-2xl font-bold text-gray-900">
-							Hallo, {displayName}!
-						</h1>
-						<p className="text-gray-500 text-sm mt-1">
-							Mitglied seit {memberSince}
-						</p>
+					<div className="flex items-center gap-4">
+						<span className="w-14 h-14 rounded-full bg-black text-white text-lg font-semibold flex items-center justify-center shrink-0">
+							{displayName.split(/\s+/).length >= 2
+								? (displayName[0] + displayName.split(/\s+/).pop()![0]).toUpperCase()
+								: displayName.slice(0, 2).toUpperCase()}
+						</span>
+						<div>
+							<h1 className="text-2xl font-bold text-gray-900">
+								Hallo, {displayName}!
+							</h1>
+							<p className="text-gray-500 text-sm mt-1">
+								Mitglied seit {memberSince}
+							</p>
+						</div>
 					</div>
 					<button
 						onClick={handleLogout}
