@@ -178,7 +178,12 @@ export default function AccountDashboard({ supabaseUrl, supabaseKey }: Props) {
 
 				{/* Orders placeholder */}
 				<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-					<h2 className="text-lg font-bold text-gray-900 mb-4">Bestellungen</h2>
+					<div className="flex items-center justify-between gap-3 mb-4">
+						<h2 className="text-lg font-bold text-gray-900">Bestellungen</h2>
+						<a href="/status" className="text-xs font-medium text-gray-500 hover:text-black hover:underline">
+							Status suchen →
+						</a>
+					</div>
 					{ordersLoading ? (
 						<div className="text-center py-6 text-sm text-gray-500">Bestellungen werden geladen...</div>
 					) : orders.length === 0 ? (
@@ -194,14 +199,13 @@ export default function AccountDashboard({ supabaseUrl, supabaseKey }: Props) {
 					) : (
 						<div className="space-y-4">
 							{orders.map((order) => (
-								<div key={order.id} className="border border-gray-200 rounded-lg p-4">
+								<a
+									key={order.id}
+									href={`/status/${encodeURIComponent(order.orderNumber)}`}
+									className="block border border-gray-200 rounded-lg p-4 hover:border-gray-300 hover:bg-gray-50/40 transition-colors"
+								>
 									<div className="flex items-center justify-between gap-2 mb-2">
-										<a
-											href={`/status/${encodeURIComponent(order.orderNumber)}`}
-											className="text-xs text-gray-500 hover:text-black hover:underline"
-										>
-											{order.orderNumber}
-										</a>
+										<p className="text-xs text-gray-500">{order.orderNumber}</p>
 										<span className="text-xs font-medium px-2 py-1 rounded bg-gray-100 text-gray-700 uppercase">
 											{order.status}
 										</span>
@@ -227,11 +231,14 @@ export default function AccountDashboard({ supabaseUrl, supabaseKey }: Props) {
 									</div>
 									<div className="pt-2 border-t border-gray-100 flex items-center justify-between text-sm">
 										<span className="font-medium text-gray-700">Gesamt</span>
-										<span className="font-bold">
-											{order.totalAmount.toFixed(2)} {order.currency}
-										</span>
+										<div className="flex items-center gap-4">
+											<span className="font-bold">
+												{order.totalAmount.toFixed(2)} {order.currency}
+											</span>
+											<span className="text-xs font-medium text-black">Status ansehen →</span>
+										</div>
 									</div>
-								</div>
+								</a>
 							))}
 						</div>
 					)}
