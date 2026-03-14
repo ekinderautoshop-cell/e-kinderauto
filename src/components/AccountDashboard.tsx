@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { getSupabaseClient } from '../lib/supabase';
 import type { User } from '@supabase/supabase-js';
+import { formatOrderNumber } from '../lib/order-number';
 
 interface Props {
 	supabaseUrl: string;
@@ -195,7 +196,12 @@ export default function AccountDashboard({ supabaseUrl, supabaseKey }: Props) {
 							{orders.map((order) => (
 								<div key={order.id} className="border border-gray-200 rounded-lg p-4">
 									<div className="flex items-center justify-between gap-2 mb-2">
-										<p className="text-xs text-gray-500">#{order.stripeSessionId}</p>
+										<p className="text-xs text-gray-500">
+											{formatOrderNumber({
+												stripeSessionId: order.stripeSessionId,
+												createdAtMs: order.createdAt,
+											})}
+										</p>
 										<span className="text-xs font-medium px-2 py-1 rounded bg-gray-100 text-gray-700 uppercase">
 											{order.status}
 										</span>

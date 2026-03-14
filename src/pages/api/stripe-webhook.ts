@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import Stripe from 'stripe';
 import { trackBrevoEvent, upsertBrevoContact } from '../../lib/brevo';
+import { formatOrderNumber } from '../../lib/order-number';
 import {
 	type D1Database,
 	type OrderItem,
@@ -121,8 +122,13 @@ async function handleCheckoutCompleted(
 	if (!email) return;
 
 	const { firstName, lastName } = splitName(session.customer_details?.name);
+	const createdAtMs = Date.now();
 	const orderTotal = normalizeAmount(session.amount_total);
 	const orderId = session.id;
+	const orderNumber = formatOrderNumber({
+		stripeSessionId: session.id,
+		createdAtMs,
+	});
 	const currency = (session.currency ?? 'eur').toUpperCase();
 	const orderItems = await fetchSessionItems(stripe, session.id, currency);
 	const productNames = orderItems.map((i) => i.name).join(', ');
@@ -140,7 +146,7 @@ async function handleCheckoutCompleted(
 			currency,
 			totalAmount: orderTotal ?? 0,
 			items: orderItems,
-			createdAt: Date.now(),
+			createdAt: createdAtMs,
 		});
 	}
 
@@ -153,7 +159,7 @@ async function handleCheckoutCompleted(
 				FIRSTNAME: firstName,
 				LASTNAME: lastName,
 				ORDER_STATUS: 'paid',
-				LAST_ORDER_ID: orderId,
+				LAST_ORDER_ID: orderNumber,
 				LAST_ORDER_TOTAL: orderTotal,
 				CURRENCY: currency,
 			},
@@ -168,6 +174,7 @@ async function handleCheckoutCompleted(
 		email,
 		properties: {
 			order_id: orderId,
+			order_number: orderNumber,
 			order_status: 'paid',
 			amount: orderTotal ?? 0,
 			currency,
