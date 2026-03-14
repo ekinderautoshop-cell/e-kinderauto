@@ -61,7 +61,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 
 		const session = await stripe.checkout.sessions.create({
 			mode: 'payment',
-			payment_method_types: ['card', 'klarna', 'giropay'],
+			payment_method_types: ['card', 'klarna', 'paypal'],
 			line_items: lineItems,
 			shipping_address_collection: {
 				allowed_countries: ['DE', 'AT', 'CH'],
