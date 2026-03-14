@@ -1,0 +1,35 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import AuthForm from '../components/AuthForm';
+
+const runtime = Astro.locals.runtime;
+const supabaseUrl = runtime?.env?.PUBLIC_SUPABASE_URL ?? import.meta.env.PUBLIC_SUPABASE_URL ?? '';
+const supabaseKey = runtime?.env?.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PUBLIC_SUPABASE_ANON_KEY ?? '';
+---
+
+<Layout title="Anmelden - E-Kinderauto">
+	<Header />
+	<main class="min-h-[calc(100vh-10rem)] flex items-center justify-center bg-gray-50 px-4 py-16">
+		<div class="w-full max-w-md">
+			<div class="text-center mb-8">
+				<a href="/" class="text-2xl font-bold tracking-tighter uppercase inline-block mb-6">
+					E-KINDER<span class="font-light">AUTO</span>
+				</a>
+				<h1 class="text-2xl font-bold text-gray-900">Willkommen zurück</h1>
+				<p class="text-gray-500 text-sm mt-1">Melde dich an, um fortzufahren.</p>
+			</div>
+
+			<div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6 md:p-8">
+				<AuthForm client:load mode="login" supabaseUrl={supabaseUrl} supabaseKey={supabaseKey} />
+			</div>
+
+			<p class="text-center text-sm text-gray-500 mt-6">
+				Noch kein Konto?
+				<a href="/registrieren" class="font-medium text-black hover:underline">Jetzt registrieren</a>
+			</p>
+		</div>
+	</main>
+</Layout>
