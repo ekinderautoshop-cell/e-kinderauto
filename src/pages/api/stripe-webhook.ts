@@ -122,7 +122,7 @@ async function handleCheckoutCompleted(
 	if (!email) return;
 
 	const { firstName, lastName } = splitName(session.customer_details?.name);
-	const createdAtMs = Date.now();
+	const createdAtMs = typeof session.created === 'number' ? session.created * 1000 : Date.now();
 	const orderTotal = normalizeAmount(session.amount_total);
 	const orderId = session.id;
 	const orderNumber = formatOrderNumber({
@@ -138,6 +138,7 @@ async function handleCheckoutCompleted(
 
 	if (db) {
 		await upsertOrder(db, {
+			orderNumber,
 			stripeSessionId: session.id,
 			stripePaymentIntentId: paymentIntentId,
 			userId: userId || undefined,

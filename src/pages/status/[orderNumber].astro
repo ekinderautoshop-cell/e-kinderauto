@@ -1,0 +1,16 @@
+---
+export const prerender = false;
+
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import OrderStatusView from '../../components/OrderStatusView';
+
+const orderNumber = Astro.params.orderNumber ?? '';
+---
+
+<Layout title={`Bestellstatus ${orderNumber} - E-Kinderauto`}>
+	<Header />
+	<main class="bg-gray-50 min-h-[calc(100vh-10rem)] py-12 px-4 md:px-8">
+		<OrderStatusView client:load orderNumber={orderNumber} />
+	</main>
+</Layout>

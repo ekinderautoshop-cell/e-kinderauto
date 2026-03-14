@@ -1,0 +1,44 @@
+---
+export const prerender = false;
+
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+---
+
+<Layout title="Bestellstatus - E-Kinderauto">
+	<Header />
+	<main class="bg-gray-50 min-h-[calc(100vh-10rem)] py-12 px-4">
+		<div class="max-w-xl mx-auto bg-white rounded-xl border border-gray-100 p-6 md:p-8">
+			<h1 class="text-xl font-bold text-gray-900 mb-2">Bestellstatus suchen</h1>
+			<p class="text-sm text-gray-500 mb-6">
+				Gib deine Bestellnummer ein (z. B. EKA-2026-123456).
+			</p>
+
+			<form id="status-form" class="flex gap-3">
+				<input
+					id="order-number"
+					type="text"
+					required
+					placeholder="EKA-2026-123456"
+					class="flex-1 px-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-black focus:border-transparent outline-none"
+				/>
+				<button
+					type="submit"
+					class="bg-black text-white px-5 py-3 rounded-lg text-sm font-semibold hover:bg-gray-800 transition-colors"
+				>
+					Pruefen
+				</button>
+			</form>
+		</div>
+	</main>
+</Layout>
+
+<script is:inline>
+	document.getElementById('status-form')?.addEventListener('submit', (event) => {
+		event.preventDefault();
+		const input = document.getElementById('order-number');
+		const value = input && 'value' in input ? String(input.value).trim() : '';
+		if (!value) return;
+		window.location.href = `/status/${encodeURIComponent(value)}`;
+	});
+</script>

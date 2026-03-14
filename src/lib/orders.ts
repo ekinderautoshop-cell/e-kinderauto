@@ -1,3 +1,5 @@
+import { formatOrderNumber } from './order-number';
+
 export interface D1Database {
 	prepare(query: string): D1PreparedStatement;
 }
@@ -19,6 +21,7 @@ export interface OrderItem {
 
 export interface StoredOrder {
 	id: number;
+	orderNumber: string;
 	stripeSessionId: string;
 	stripePaymentIntentId?: string;
 	userId?: string;
@@ -41,11 +44,19 @@ async function exec(db: D1Database, query: string, params: unknown[] = []): Prom
 	await stmt.all();
 }
 
+async function ensureColumnExists(db: D1Database, tableName: string, columnName: string, columnSql: string): Promise<void> {
+	const info = await db.prepare(`PRAGMA table_info(${tableName})`).all<{ name: string }>();
+	const exists = info.results.some((col) => col.name === columnName);
+	if (exists) return;
+	await exec(db, `ALTER TABLE ${tableName} ADD COLUMN ${columnSql}`);
+}
+
 export async function ensureOrdersTable(db: D1Database): Promise<void> {
 	await exec(
 		db,
 		`CREATE TABLE IF NOT EXISTS orders (
 			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			order_number TEXT,
 			stripe_session_id TEXT NOT NULL UNIQUE,
 			stripe_payment_intent_id TEXT,
 			user_id TEXT,
@@ -57,14 +68,17 @@ export async function ensureOrdersTable(db: D1Database): Promise<void> {
 			created_at INTEGER NOT NULL
 		)`
 	);
+	await ensureColumnExists(db, 'orders', 'order_number', 'order_number TEXT');
 	await exec(db, 'CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders(user_id)');
 	await exec(db, 'CREATE INDEX IF NOT EXISTS idx_orders_customer_email ON orders(customer_email)');
 	await exec(db, 'CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC)');
+	await exec(db, 'CREATE INDEX IF NOT EXISTS idx_orders_order_number ON orders(order_number)');
 }
 
 export async function upsertOrder(db: D1Database, order: Omit<StoredOrder, 'id'>): Promise<void> {
 	await ensureOrdersTable(db);
 	const query = `INSERT INTO orders (
+		order_number,
 		stripe_session_id,
 		stripe_payment_intent_id,
 		user_id,
@@ -74,8 +88,9 @@ export async function upsertOrder(db: D1Database, order: Omit<StoredOrder, 'id'>
 		total_amount,
 		items_json,
 		created_at
-	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+	) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 	ON CONFLICT(stripe_session_id) DO UPDATE SET
+		order_number = excluded.order_number,
 		stripe_payment_intent_id = excluded.stripe_payment_intent_id,
 		user_id = excluded.user_id,
 		customer_email = excluded.customer_email,
@@ -85,6 +100,7 @@ export async function upsertOrder(db: D1Database, order: Omit<StoredOrder, 'id'>
 		items_json = excluded.items_json`;
 
 	await exec(db, query, [
+		order.orderNumber,
 		order.stripeSessionId,
 		order.stripePaymentIntentId ?? null,
 		order.userId ?? null,
@@ -118,6 +134,7 @@ export async function updateOrderStatusByPaymentIntentOrEmail(
 
 interface OrderRow {
 	id: number;
+	order_number: string | null;
 	stripe_session_id: string;
 	stripe_payment_intent_id: string | null;
 	user_id: string | null;
@@ -139,6 +156,12 @@ function mapRow(row: OrderRow): StoredOrder {
 	}
 	return {
 		id: row.id,
+		orderNumber:
+			row.order_number ??
+			formatOrderNumber({
+				stripeSessionId: row.stripe_session_id,
+				createdAtMs: row.created_at,
+			}),
 		stripeSessionId: row.stripe_session_id,
 		stripePaymentIntentId: row.stripe_payment_intent_id ?? undefined,
 		userId: row.user_id ?? undefined,
@@ -149,6 +172,35 @@ function mapRow(row: OrderRow): StoredOrder {
 		items,
 		createdAt: row.created_at,
 	};
+}
+
+export async function getOrderByOrderNumberForUser(
+	db: D1Database,
+	params: { orderNumber: string; userId?: string; email?: string }
+): Promise<StoredOrder | null> {
+	await ensureOrdersTable(db);
+	const { orderNumber, userId, email } = params;
+	if (!userId && !email) return null;
+
+	if (userId) {
+		const byNumberUser = await db
+			.prepare('SELECT * FROM orders WHERE order_number = ? AND user_id = ? LIMIT 1')
+			.bind(orderNumber, userId)
+			.first<OrderRow>();
+		if (byNumberUser) return mapRow(byNumberUser);
+	}
+
+	if (email) {
+		const byNumberEmail = await db
+			.prepare('SELECT * FROM orders WHERE order_number = ? AND customer_email = ? LIMIT 1')
+			.bind(orderNumber, email)
+			.first<OrderRow>();
+		if (byNumberEmail) return mapRow(byNumberEmail);
+	}
+
+	// Fallback fuer aeltere Orders ohne gespeicherte order_number.
+	const candidates = await getOrdersForUser(db, { userId, email, limit: 200 });
+	return candidates.find((order) => order.orderNumber === orderNumber) ?? null;
 }
 
 export async function getOrdersForUser(
