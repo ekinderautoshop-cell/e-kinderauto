@@ -3,14 +3,26 @@ export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
-import { SignIn } from '@clerk/astro/components';
 ---
 
 <Layout title="Anmelden - E-Kinderauto">
 	<Header />
 	<main class="container mx-auto px-4 py-10">
-		<div class="max-w-md mx-auto">
-			<SignIn routing="path" path="/sign-in" signUpUrl="/sign-up" />
+		<div class="max-w-md mx-auto text-center">
+			<h1 class="text-3xl font-bold mb-6">Anmelden</h1>
+			<div id="clerk-sign-in"></div>
 		</div>
 	</main>
 </Layout>
+
+<script is:inline define:vars={{ clerkPk: import.meta.env.PUBLIC_CLERK_PUBLISHABLE_KEY }}>
+	async function loadClerk() {
+		const pk = clerkPk || document.querySelector('meta[name="clerk-publishable-key"]')?.content;
+		if (!pk) return;
+		const Clerk = (await import('https://esm.sh/@clerk/clerk-js@latest')).default;
+		const clerk = new Clerk(pk);
+		await clerk.load();
+		clerk.mountSignIn(document.getElementById('clerk-sign-in'));
+	}
+	loadClerk();
+</script>

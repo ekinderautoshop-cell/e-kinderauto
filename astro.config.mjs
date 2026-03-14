@@ -2,7 +2,6 @@
 import { defineConfig } from 'astro/config';
 
 import cloudflare from '@astrojs/cloudflare';
-import clerk from '@clerk/astro';
 import react from '@astrojs/react';
 import tailwind from '@astrojs/tailwind';
 
@@ -10,7 +9,7 @@ import tailwind from '@astrojs/tailwind';
 export default defineConfig({
   output: 'server',
   adapter: cloudflare(),
-  integrations: [clerk(), react(), tailwind()],
+  integrations: [react(), tailwind()],
   vite: {
     resolve: {
       // React SSR auf Edge-Version umstellen (Cloudflare Workers haben kein MessageChannel)

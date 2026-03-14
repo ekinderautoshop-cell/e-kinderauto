@@ -5,12 +5,6 @@ import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import CheckoutForm from '../components/CheckoutForm';
 
-try {
-	const { isAuthenticated, redirectToSignIn } = Astro.locals.auth();
-	if (!isAuthenticated) return redirectToSignIn();
-} catch {
-	// Clerk nicht verfügbar – Checkout trotzdem rendern
-}
 ---
 
 <Layout title="Kasse - E-Kinderauto Shop">
