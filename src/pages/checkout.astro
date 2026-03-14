@@ -4,14 +4,14 @@ export const prerender = false;
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
 import CheckoutForm from '../components/CheckoutForm';
-
 ---
 
-<Layout title="Kasse - E-Kinderauto Shop">
+<Layout title="Warenkorb - E-Kinderauto">
 	<Header />
-	<main class="container mx-auto px-4 py-8">
-		<h1 class="text-3xl font-bold mb-8">Kasse</h1>
+	<main class="bg-gray-50 min-h-[calc(100vh-10rem)] py-12 px-4 md:px-8">
+		<div class="max-w-3xl mx-auto mb-8">
+			<h1 class="text-2xl font-bold text-gray-900">Warenkorb</h1>
+		</div>
 		<CheckoutForm client:load />
 	</main>
 </Layout>
-
