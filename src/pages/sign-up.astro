@@ -26,8 +26,9 @@ const clerkPk = runtime?.env?.PUBLIC_CLERK_PUBLISHABLE_KEY ?? import.meta.env.PU
 			return;
 		}
 		try {
-			const { default: Clerk } = await import('https://esm.sh/@clerk/clerk-js@5');
-			const clerk = new Clerk(clerkPk);
+			const mod = await import('https://esm.sh/@clerk/clerk-js@5');
+			const ClerkClass = mod.Clerk || mod.default;
+			const clerk = new ClerkClass(clerkPk);
 			await clerk.load();
 			document.getElementById('clerk-loading').style.display = 'none';
 			clerk.mountSignUp(document.getElementById('clerk-sign-up'));
