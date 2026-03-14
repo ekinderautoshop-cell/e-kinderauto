@@ -1,6 +1,12 @@
 import type { APIRoute } from 'astro';
-import type Stripe from 'stripe';
+import Stripe from 'stripe';
 import { trackBrevoEvent, upsertBrevoContact } from '../../lib/brevo';
+import {
+	type D1Database,
+	type OrderItem,
+	updateOrderStatusByPaymentIntentOrEmail,
+	upsertOrder,
+} from '../../lib/orders';
 
 export const prerender = false;
 
@@ -69,7 +75,47 @@ function splitName(fullName: string | null | undefined): { firstName?: string; l
 	};
 }
 
-async function handleCheckoutCompleted(event: Stripe.Event, brevoApiKey: string): Promise<void> {
+async function fetchSessionItems(
+	stripe: Stripe,
+	sessionId: string,
+	currency: string
+): Promise<OrderItem[]> {
+	const items: OrderItem[] = [];
+	let hasMore = true;
+	let startingAfter: string | undefined;
+	while (hasMore) {
+		const res = await stripe.checkout.sessions.listLineItems(sessionId, {
+			limit: 100,
+			...(startingAfter ? { starting_after: startingAfter } : {}),
+		});
+		for (const item of res.data) {
+			const name = item.description ?? 'Artikel';
+			const quantity = item.quantity ?? 1;
+			const unitAmount = normalizeAmount(item.price?.unit_amount) ?? 0;
+			const totalAmount = normalizeAmount(item.amount_total) ?? unitAmount * quantity;
+			const image = item.price?.product && typeof item.price.product !== 'string'
+				? item.price.product.images?.[0]
+				: undefined;
+			items.push({
+				name,
+				quantity,
+				unitAmount,
+				totalAmount,
+				currency,
+				image,
+			});
+		}
+		hasMore = res.has_more;
+		startingAfter = res.data.length > 0 ? res.data[res.data.length - 1].id : undefined;
+	}
+	return items;
+}
+
+async function handleCheckoutCompleted(
+	event: Stripe.Event,
+	options: { brevoApiKey: string; stripe: Stripe; db?: D1Database }
+): Promise<void> {
+	const { brevoApiKey, stripe, db } = options;
 	const session = event.data.object as Stripe.Checkout.Session;
 	const email = session.customer_details?.email ?? session.customer_email ?? undefined;
 	if (!email) return;
@@ -78,6 +124,25 @@ async function handleCheckoutCompleted(event: Stripe.Event, brevoApiKey: string)
 	const orderTotal = normalizeAmount(session.amount_total);
 	const orderId = session.id;
 	const currency = (session.currency ?? 'eur').toUpperCase();
+	const orderItems = await fetchSessionItems(stripe, session.id, currency);
+	const productNames = orderItems.map((i) => i.name).join(', ');
+	const userId = session.client_reference_id ?? session.metadata?.user_id ?? undefined;
+	const paymentIntentId =
+		typeof session.payment_intent === 'string' ? session.payment_intent : session.payment_intent?.id;
+
+	if (db) {
+		await upsertOrder(db, {
+			stripeSessionId: session.id,
+			stripePaymentIntentId: paymentIntentId,
+			userId: userId || undefined,
+			customerEmail: email,
+			status: 'paid',
+			currency,
+			totalAmount: orderTotal ?? 0,
+			items: orderItems,
+			createdAt: Date.now(),
+		});
+	}
 
 	await upsertBrevoContact({
 		apiKey: brevoApiKey,
@@ -101,17 +166,31 @@ async function handleCheckoutCompleted(event: Stripe.Event, brevoApiKey: string)
 			order_status: 'paid',
 			amount: orderTotal ?? 0,
 			currency,
+			items_count: orderItems.length,
+			items: productNames,
 		},
 	});
 }
 
-async function handlePaymentFailed(event: Stripe.Event, brevoApiKey: string): Promise<void> {
+async function handlePaymentFailed(
+	event: Stripe.Event,
+	options: { brevoApiKey: string; db?: D1Database }
+): Promise<void> {
+	const { brevoApiKey, db } = options;
 	const paymentIntent = event.data.object as Stripe.PaymentIntent;
 	const email = paymentIntent.receipt_email ?? undefined;
 	if (!email) return;
 
 	const amount = normalizeAmount(paymentIntent.amount);
 	const currency = (paymentIntent.currency ?? 'eur').toUpperCase();
+
+	if (db) {
+		await updateOrderStatusByPaymentIntentOrEmail(db, {
+			paymentIntentId: paymentIntent.id,
+			email,
+			status: 'payment_failed',
+		});
+	}
 
 	await upsertBrevoContact({
 		apiKey: brevoApiKey,
@@ -135,13 +214,25 @@ async function handlePaymentFailed(event: Stripe.Event, brevoApiKey: string): Pr
 	});
 }
 
-async function handleChargeRefunded(event: Stripe.Event, brevoApiKey: string): Promise<void> {
+async function handleChargeRefunded(
+	event: Stripe.Event,
+	options: { brevoApiKey: string; db?: D1Database }
+): Promise<void> {
+	const { brevoApiKey, db } = options;
 	const charge = event.data.object as Stripe.Charge;
 	const email = charge.billing_details?.email ?? undefined;
 	if (!email) return;
 
 	const amountRefunded = normalizeAmount(charge.amount_refunded);
 	const currency = (charge.currency ?? 'eur').toUpperCase();
+
+	if (db) {
+		await updateOrderStatusByPaymentIntentOrEmail(db, {
+			paymentIntentId: typeof charge.payment_intent === 'string' ? charge.payment_intent : undefined,
+			email,
+			status: 'refunded',
+		});
+	}
 
 	await upsertBrevoContact({
 		apiKey: brevoApiKey,
@@ -167,13 +258,16 @@ async function handleChargeRefunded(event: Stripe.Event, brevoApiKey: string): P
 
 export const POST: APIRoute = async ({ request, locals }) => {
 	const runtime = (locals as { runtime?: { env?: Record<string, string | undefined> } }).runtime;
+	const stripeSecret = runtime?.env?.STRIPE_SECRET_KEY ?? import.meta.env.STRIPE_SECRET_KEY ?? '';
 	const webhookSecret =
 		runtime?.env?.STRIPE_WEBHOOK_SECRET ?? import.meta.env.STRIPE_WEBHOOK_SECRET ?? '';
 	const brevoApiKey = runtime?.env?.BREVO_API_KEY ?? import.meta.env.BREVO_API_KEY ?? '';
+	const db = runtime?.env?.DB as unknown as D1Database | undefined;
 
-	if (!webhookSecret || !brevoApiKey) {
+	if (!stripeSecret || !webhookSecret || !brevoApiKey) {
 		return new Response('Webhook is not configured', { status: 500 });
 	}
+	const stripe = new Stripe(stripeSecret, { apiVersion: '2024-12-18.acacia' as any });
 
 	const signatureHeader = request.headers.get('stripe-signature');
 	if (!signatureHeader) {
@@ -196,13 +290,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
 	try {
 		switch (event.type) {
 			case 'checkout.session.completed':
-				await handleCheckoutCompleted(event, brevoApiKey);
+				await handleCheckoutCompleted(event, { brevoApiKey, stripe, db });
 				break;
 			case 'payment_intent.payment_failed':
-				await handlePaymentFailed(event, brevoApiKey);
+				await handlePaymentFailed(event, { brevoApiKey, db });
 				break;
 			case 'charge.refunded':
-				await handleChargeRefunded(event, brevoApiKey);
+				await handleChargeRefunded(event, { brevoApiKey, db });
 				break;
 			default:
 				break;

@@ -13,6 +13,12 @@ interface CartItem {
 	quantity: number;
 }
 
+interface CheckoutPayload {
+	items: CartItem[];
+	userId?: string;
+	userEmail?: string;
+}
+
 export const POST: APIRoute = async ({ request, locals, url }) => {
 	const runtime = (locals as any).runtime;
 	const stripeKey = runtime?.env?.STRIPE_SECRET_KEY ?? import.meta.env.STRIPE_SECRET_KEY ?? '';
@@ -26,7 +32,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 
 	const stripe = new Stripe(stripeKey, { apiVersion: '2024-12-18.acacia' as any });
 
-	let body: { items: CartItem[] };
+	let body: CheckoutPayload;
 	try {
 		body = await request.json();
 	} catch {
@@ -36,7 +42,7 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 		});
 	}
 
-	const { items } = body;
+	const { items, userId, userEmail } = body;
 	if (!items?.length) {
 		return new Response(JSON.stringify({ error: 'Warenkorb ist leer.' }), {
 			status: 400,
@@ -63,6 +69,12 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 			mode: 'payment',
 			payment_method_types: ['card', 'klarna', 'paypal'],
 			line_items: lineItems,
+			...(userEmail ? { customer_email: userEmail } : {}),
+			...(userId ? { client_reference_id: userId } : {}),
+			metadata: {
+				user_id: userId ?? '',
+				user_email: userEmail ?? '',
+			},
 			shipping_address_collection: {
 				allowed_countries: ['DE', 'AT', 'CH'],
 			},

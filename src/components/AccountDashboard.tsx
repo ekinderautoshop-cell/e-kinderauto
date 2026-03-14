@@ -7,12 +7,32 @@ interface Props {
 	supabaseKey: string;
 }
 
+interface OrderItem {
+	name: string;
+	quantity: number;
+	unitAmount: number;
+	totalAmount: number;
+	currency: string;
+}
+
+interface Order {
+	id: number;
+	stripeSessionId: string;
+	status: string;
+	currency: string;
+	totalAmount: number;
+	items: OrderItem[];
+	createdAt: number;
+}
+
 export default function AccountDashboard({ supabaseUrl, supabaseKey }: Props) {
 	const [user, setUser] = useState<User | null>(null);
 	const [loading, setLoading] = useState(true);
 	const [savingName, setSavingName] = useState(false);
 	const [name, setName] = useState('');
 	const [nameSuccess, setNameSuccess] = useState('');
+	const [orders, setOrders] = useState<Order[]>([]);
+	const [ordersLoading, setOrdersLoading] = useState(true);
 
 	const supabase = getSupabaseClient({ PUBLIC_SUPABASE_URL: supabaseUrl, PUBLIC_SUPABASE_ANON_KEY: supabaseKey });
 
@@ -31,6 +51,23 @@ export default function AccountDashboard({ supabaseUrl, supabaseKey }: Props) {
 			setLoading(false);
 		});
 	}, []);
+
+	useEffect(() => {
+		if (!user) return;
+		const params = new URLSearchParams();
+		params.set('userId', user.id);
+		if (user.email) params.set('email', user.email);
+		fetch(`/api/orders?${params.toString()}`)
+			.then((res) => res.json())
+			.then((data) => {
+				setOrders(Array.isArray(data.orders) ? data.orders : []);
+				setOrdersLoading(false);
+			})
+			.catch(() => {
+				setOrders([]);
+				setOrdersLoading(false);
+			});
+	}, [user]);
 
 	async function handleLogout() {
 		if (!supabase) return;
@@ -141,15 +178,57 @@ export default function AccountDashboard({ supabaseUrl, supabaseKey }: Props) {
 				{/* Orders placeholder */}
 				<div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
 					<h2 className="text-lg font-bold text-gray-900 mb-4">Bestellungen</h2>
-					<div className="text-center py-8">
-						<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-gray-300 mx-auto mb-3">
-							<path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-						</svg>
-						<p className="text-gray-500 text-sm">Noch keine Bestellungen vorhanden.</p>
-						<a href="/produkte" className="inline-block mt-4 text-sm font-medium text-black hover:underline">
-							Jetzt shoppen →
-						</a>
-					</div>
+					{ordersLoading ? (
+						<div className="text-center py-6 text-sm text-gray-500">Bestellungen werden geladen...</div>
+					) : orders.length === 0 ? (
+						<div className="text-center py-8">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12 text-gray-300 mx-auto mb-3">
+								<path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+							</svg>
+							<p className="text-gray-500 text-sm">Noch keine Bestellungen vorhanden.</p>
+							<a href="/produkte" className="inline-block mt-4 text-sm font-medium text-black hover:underline">
+								Jetzt shoppen →
+							</a>
+						</div>
+					) : (
+						<div className="space-y-4">
+							{orders.map((order) => (
+								<div key={order.id} className="border border-gray-200 rounded-lg p-4">
+									<div className="flex items-center justify-between gap-2 mb-2">
+										<p className="text-xs text-gray-500">#{order.stripeSessionId}</p>
+										<span className="text-xs font-medium px-2 py-1 rounded bg-gray-100 text-gray-700 uppercase">
+											{order.status}
+										</span>
+									</div>
+									<p className="text-sm text-gray-500 mb-2">
+										{new Date(order.createdAt).toLocaleDateString('de-DE', {
+											year: 'numeric',
+											month: 'short',
+											day: 'numeric',
+										})}
+									</p>
+									<div className="space-y-1 mb-3">
+										{order.items.map((item, index) => (
+											<div key={`${order.id}-${index}`} className="text-sm text-gray-700 flex items-center justify-between gap-3">
+												<span className="truncate">
+													{item.quantity} x {item.name}
+												</span>
+												<span className="font-medium shrink-0">
+													{item.totalAmount.toFixed(2)} {order.currency}
+												</span>
+											</div>
+										))}
+									</div>
+									<div className="pt-2 border-t border-gray-100 flex items-center justify-between text-sm">
+										<span className="font-medium text-gray-700">Gesamt</span>
+										<span className="font-bold">
+											{order.totalAmount.toFixed(2)} {order.currency}
+										</span>
+									</div>
+								</div>
+							))}
+						</div>
+					)}
 				</div>
 
 				{/* Addresses placeholder */}

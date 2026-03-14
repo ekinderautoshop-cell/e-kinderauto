@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { Product } from '../types/product';
 import { getShortProductName } from '../lib/d1-products';
 import { stripMitLizenz } from '../data/shop-content';
+import { getSupabaseClient } from '../lib/supabase';
 
 interface CartItem {
 	product: Product;
@@ -12,12 +13,24 @@ export default function CheckoutForm() {
 	const [cart, setCart] = useState<CartItem[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
+	const [userId, setUserId] = useState<string | undefined>(undefined);
+	const [userEmail, setUserEmail] = useState<string | undefined>(undefined);
 
 	useEffect(() => {
 		const savedCart = localStorage.getItem('cart');
 		if (savedCart) {
 			setCart(JSON.parse(savedCart));
 		}
+	}, []);
+
+	useEffect(() => {
+		const supabase = getSupabaseClient();
+		if (!supabase) return;
+		supabase.auth.getUser().then(({ data }) => {
+			if (!data.user) return;
+			setUserId(data.user.id);
+			setUserEmail(data.user.email ?? undefined);
+		});
 	}, []);
 
 	const totalPrice = cart.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
@@ -64,6 +77,8 @@ export default function CheckoutForm() {
 						},
 						quantity: item.quantity,
 					})),
+					userId,
+					userEmail,
 				}),
 			});
 
