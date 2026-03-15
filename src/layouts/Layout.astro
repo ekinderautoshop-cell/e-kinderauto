@@ -6,9 +6,19 @@ import Footer from '../components/Footer.astro';
 interface Props {
 	title: string;
 	description?: string;
+	canonicalUrl?: string;
+	ogImage?: string;
+	noindex?: boolean;
 }
 
-const { title, description = 'Ihr Shop für Kinderautos' } = Astro.props;
+const {
+	title,
+	description = 'Ihr Shop für Kinderautos',
+	canonicalUrl,
+	ogImage = new URL('/logo.png?v=2', Astro.url.origin).toString(),
+	noindex = false,
+} = Astro.props;
+const resolvedCanonical = canonicalUrl ?? Astro.url.toString();
 ---
 
 <!doctype html>
@@ -17,6 +27,18 @@ const { title, description = 'Ihr Shop für Kinderautos' } = Astro.props;
 		<meta charset="UTF-8" />
 		<meta name="description" content={description} />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="canonical" href={resolvedCanonical} />
+		<meta property="og:type" content="website" />
+		<meta property="og:site_name" content="E-Kinderauto" />
+		<meta property="og:title" content={title} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={resolvedCanonical} />
+		<meta property="og:image" content={ogImage} />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content={title} />
+		<meta name="twitter:description" content={description} />
+		<meta name="twitter:image" content={ogImage} />
+		{noindex && <meta name="robots" content="noindex,nofollow" />}
 		<link rel="icon" type="image/png" href="/logo.png?v=2" />
 		<link rel="shortcut icon" href="/logo.png?v=2" />
 		<link rel="apple-touch-icon" href="/logo.png?v=2" />

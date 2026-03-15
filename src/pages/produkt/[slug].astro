@@ -9,7 +9,7 @@ import { getProductsFromD1 } from '../../lib/d1-products';
 import { isErsatzteilProduct, isZusatzartikelProduct } from '../../lib/d1-products';
 import { stripMitLizenz } from '../../data/shop-content';
 import { ALLOWED_CATEGORY_NAMES } from '../../data/shop-content';
-import { getProductSlug } from '../../lib/product-url';
+import { getBaseProductSlug, getProductSlug, getProductUrl } from '../../lib/product-url';
 import { products as staticProducts } from '../../data/products';
 
 const slugParam = Astro.params.slug;
@@ -26,10 +26,14 @@ const allProducts = allRaw.filter(
 		!isZusatzartikelProduct(p.name)
 );
 
-const matches = allProducts.filter((p) => getProductSlug(p) === slugParam);
+const matches = allProducts.filter(
+	(p) => getProductSlug(p) === slugParam || getBaseProductSlug(p) === slugParam
+);
 if (matches.length === 0) return Astro.redirect('/produkte');
 
 const product = matches[0]!;
+const canonicalUrl = new URL(getProductUrl(product), Astro.url.origin).toString();
+if (slugParam !== getProductSlug(product)) return Astro.redirect(getProductUrl(product), 301);
 const baseSku = getBaseSku(product);
 
 let variants: import('../../types/product').Product[] = [];
@@ -45,11 +49,37 @@ const rawDesc = (product.description || '').replace(/<[^>]+>/g, ' ').replace(/\s
 const metaDescription = rawDesc
 	? (rawDesc.length > 320 ? rawDesc.slice(0, 317) + '…' : rawDesc)
 	: `${getShortProductName(stripMitLizenz(product.name))} im E-Kinderauto Shop. Jetzt entdecken.`;
+const metaImage = product.image || '/logo.png';
+const productJsonLd = {
+	'@context': 'https://schema.org',
+	'@type': 'Product',
+	name: getShortProductName(stripMitLizenz(product.name), 80),
+	image: [new URL(metaImage, Astro.url.origin).toString()],
+	description: metaDescription,
+	sku: product.id,
+	brand: {
+		'@type': 'Brand',
+		name: 'E-Kinderauto',
+	},
+	offers: {
+		'@type': 'Offer',
+		priceCurrency: 'EUR',
+		price: product.price.toFixed(2),
+		availability: product.inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+		url: canonicalUrl,
+	},
+};
 ---
 
-<Layout title={metaTitle} description={metaDescription}>
+<Layout
+	title={metaTitle}
+	description={metaDescription}
+	canonicalUrl={canonicalUrl}
+	ogImage={new URL(metaImage, Astro.url.origin).toString()}
+>
 	<Header />
 	<main class="container mx-auto px-4 py-8">
 		<ProductDetail product={product} variants={variants.length > 1 ? variants : undefined} client:load />
 	</main>
+	<script type="application/ld+json" set:html={JSON.stringify(productJsonLd)} />
 </Layout>
