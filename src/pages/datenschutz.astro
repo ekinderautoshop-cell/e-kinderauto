@@ -1,0 +1,68 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+---
+
+<Layout title="Datenschutz - E-Kinderauto">
+	<Header />
+	<main class="bg-white pb-20">
+		<div class="bg-gray-50 py-12 md:py-20 mb-12 border-b border-gray-100">
+			<div class="container mx-auto px-6 md:px-12 text-center">
+				<h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Datenschutzerklaerung</h1>
+				<p class="text-gray-500 max-w-2xl mx-auto text-lg">
+					Informationen zur Verarbeitung personenbezogener Daten in unserem Shop.
+				</p>
+			</div>
+		</div>
+
+		<div class="container mx-auto px-6 md:px-12 max-w-3xl">
+			<div class="prose prose-gray max-w-none">
+				<h2>1. Verantwortlicher</h2>
+				<p>
+					[Unternehmensname], [Adresse], [E-Mail], [Telefon]
+				</p>
+
+				<h2>2. Zwecke und Rechtsgrundlagen</h2>
+				<p>
+					Wir verarbeiten personenbezogene Daten zur Vertragsabwicklung, Bearbeitung von Anfragen,
+					Bereitstellung des Shops sowie zur Erfuellung gesetzlicher Pflichten.
+				</p>
+
+				<h2>3. Zahlungsabwicklung</h2>
+				<p>
+					Fuer Zahlungen nutzen wir Stripe. Dabei werden zahlungsrelevante Daten an Stripe uebermittelt.
+					Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
+				</p>
+
+				<h2>4. E-Mail und Marketing</h2>
+				<p>
+					Fuer transaktionale E-Mails und Automationen kann Brevo eingesetzt werden. Newsletter werden nur bei
+					Einwilligung versendet (Art. 6 Abs. 1 lit. a DSGVO).
+				</p>
+
+				<h2>5. Speicherdauer</h2>
+				<p>
+					Wir speichern personenbezogene Daten nur so lange, wie es fuer die genannten Zwecke erforderlich ist
+					oder gesetzliche Aufbewahrungspflichten bestehen.
+				</p>
+
+				<h2>6. Betroffenenrechte</h2>
+				<p>
+					Du hast das Recht auf Auskunft, Berichtigung, Loeschung, Einschraenkung, Datenuebertragbarkeit sowie
+					Widerspruch gegen die Verarbeitung deiner Daten.
+				</p>
+
+				<h2>7. Beschwerderecht</h2>
+				<p>
+					Du kannst dich bei einer Datenschutzaufsichtsbehoerde beschweren.
+				</p>
+
+				<h2>Hinweis</h2>
+				<p>
+					Diese Seite ist eine allgemeine Vorlage. Bitte lasse den finalen Text rechtlich pruefen und ersetze
+					die Platzhalter durch deine Daten.
+				</p>
+			</div>
+		</div>
+	</main>
+</Layout>

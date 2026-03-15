@@ -1,0 +1,55 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+---
+
+<Layout title="Impressum - E-Kinderauto">
+	<Header />
+	<main class="bg-white pb-20">
+		<div class="bg-gray-50 py-12 md:py-20 mb-12 border-b border-gray-100">
+			<div class="container mx-auto px-6 md:px-12 text-center">
+				<h1 class="text-4xl md:text-5xl font-bold mb-4 tracking-tight">Impressum</h1>
+				<p class="text-gray-500 max-w-2xl mx-auto text-lg">
+					Anbieterkennzeichnung gemaess 5 TMG.
+				</p>
+			</div>
+		</div>
+
+		<div class="container mx-auto px-6 md:px-12 max-w-3xl">
+			<div class="prose prose-gray max-w-none">
+				<h2>Angaben gemaess 5 TMG</h2>
+				<p>
+					E-Kinderauto Shop<br />
+					[Unternehmensname]<br />
+					[Strasse und Hausnummer]<br />
+					[PLZ Ort]<br />
+					Deutschland
+				</p>
+
+				<h2>Vertreten durch</h2>
+				<p>[Vor- und Nachname der vertretungsberechtigten Person]</p>
+
+				<h2>Kontakt</h2>
+				<p>
+					Telefon: [Telefonnummer]<br />
+					E-Mail: [E-Mail-Adresse]
+				</p>
+
+				<h2>Registereintrag</h2>
+				<p>
+					Eintragung im Handelsregister.<br />
+					Registergericht: [Registergericht]<br />
+					Registernummer: [Registernummer]
+				</p>
+
+				<h2>Umsatzsteuer-ID</h2>
+				<p>Umsatzsteuer-Identifikationsnummer gemaess 27 a Umsatzsteuergesetz: [USt-IdNr]</p>
+
+				<h2>Hinweis</h2>
+				<p>
+					Bitte ersetze die Platzhalter in eckigen Klammern durch deine echten Daten.
+				</p>
+			</div>
+		</div>
+	</main>
+</Layout>
