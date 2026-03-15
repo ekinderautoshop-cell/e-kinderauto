@@ -67,7 +67,6 @@ export const POST: APIRoute = async ({ request, locals, url }) => {
 
 		const session = await stripe.checkout.sessions.create({
 			mode: 'payment',
-			automatic_payment_methods: { enabled: true },
 			line_items: lineItems,
 			...(userEmail ? { customer_email: userEmail } : {}),
 			...(userId ? { client_reference_id: userId } : {}),
