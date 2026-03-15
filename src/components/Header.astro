@@ -17,8 +17,16 @@ const supabaseKey = runtime?.env?.PUBLIC_SUPABASE_ANON_KEY ?? import.meta.env.PU
         </button>
 
 		<!-- Logo -->
-		<a href="/" class="text-2xl font-bold tracking-tighter uppercase">
-			E-KINDER<span class="font-light">AUTO</span>
+		<a href="/" class="flex items-center gap-2 text-2xl font-bold tracking-tighter uppercase">
+			<img
+				src="/logo.svg"
+				alt="E-Kinderauto Logo"
+				width="34"
+				height="34"
+				class="w-[34px] h-[34px] object-contain"
+				loading="eager"
+			/>
+			<span>E-KINDER<span class="font-light">AUTO</span></span>
 		</a>
 
         <!-- Desktop Navigation -->
