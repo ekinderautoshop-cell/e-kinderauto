@@ -169,19 +169,33 @@ export function getBaseProductName(product: Product): string {
  */
 export function getShortProductName(fullName: string, maxLength = 52): string {
 	if (!fullName.trim()) return fullName;
-	let name = fullName.trim();
-	const colorSuffix = name.match(/\s+-\s*[A-Za-zäöüÄÖÜß0-9\s]+$/);
+	let name = fullName.trim().replace(/\s+/g, ' ');
+	// Führende Trennzeichen aus Lieferanten-Feeds entfernen (z. B. "-", "–", ":")
+	name = name.replace(/^[\s\-–—:;,.|]+/, '').trim();
+
+	const colorSuffix = name.match(/\s+-\s*[A-Za-zäöüÄÖÜß]{2,}(?:\s+[A-Za-zäöüÄÖÜß0-9]{1,}){0,2}$/);
 	if (colorSuffix) name = name.slice(0, -colorSuffix[0].length).trim();
-	const quoted = name.match(/"([^"]+)"/);
+
+	const quoted = name.match(/["„]([^"“]+)["“]/);
 	if (quoted) {
 		name = quoted[1]!.trim();
 	} else {
 		const firstPart = name.split(/\s+-\s+/)[0];
 		name = (firstPart ?? name).trim();
 	}
-	const prefixRegex = /^(Elektro Kinderfahrzeug|Elektro Kindermotorrad|Kinderfahrzeug)(\s*-\s*|\s+)/i;
-	const withoutPrefix = name.replace(prefixRegex, '').trim();
+
+	const prefixRegex =
+		/^(Elektro\s+Kinderfahrzeug|Elektro\s+Kinderauto|Elektro\s+Auto|Elektroauto|Elektro\s+Kindermotorrad|Kinderfahrzeug)(\s*-\s*|\s+)/i;
+	const withoutPrefix = name
+		.replace(prefixRegex, '')
+		.replace(/\b(lizenziert(?:es)?|mit\s+lizenz)\b/gi, '')
+		.replace(/\s+/g, ' ')
+		.replace(/^[\s\-–—:;,.|]+/, '')
+		.replace(/[\s\-–—:;,.|]+$/, '')
+		.trim();
+
 	if (withoutPrefix) name = withoutPrefix;
+	if (!name) name = fullName.trim().replace(/^[\s\-–—:;,.|]+/, '').trim();
 	if (name.length > maxLength) name = name.slice(0, maxLength - 1).trim() + '…';
 	return name;
 }
