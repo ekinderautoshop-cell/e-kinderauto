@@ -203,7 +203,7 @@ export default function CheckoutForm() {
 						)}
 					</button>
 					<p className="text-center text-xs text-gray-400 mt-3">
-						Sichere Zahlung über Stripe · Kreditkarte · Klarna · PayPal
+						Sichere Zahlung über Stripe · verfügbare Zahlarten werden automatisch angezeigt
 					</p>
 				</div>
 			</div>
