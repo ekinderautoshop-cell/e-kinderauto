@@ -8,6 +8,7 @@ interface Props {
 	description?: string;
 	canonicalUrl?: string;
 	ogImage?: string;
+	ogType?: string;
 	noindex?: boolean;
 }
 
@@ -16,6 +17,7 @@ const {
 	description = 'Ihr Shop für Kinderautos',
 	canonicalUrl,
 	ogImage = new URL('/logo.png?v=2', Astro.url.origin).toString(),
+	ogType = 'website',
 	noindex = false,
 } = Astro.props;
 const resolvedCanonical = canonicalUrl ?? Astro.url.toString();
@@ -28,7 +30,7 @@ const resolvedCanonical = canonicalUrl ?? Astro.url.toString();
 		<meta name="description" content={description} />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<link rel="canonical" href={resolvedCanonical} />
-		<meta property="og:type" content="website" />
+		<meta property="og:type" content={ogType} />
 		<meta property="og:site_name" content="E-Kinderauto" />
 		<meta property="og:title" content={title} />
 		<meta property="og:description" content={description} />
