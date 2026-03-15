@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 90 28" role="img" aria-label="Mastercard">
+  <rect width="90" height="28" rx="6" fill="#ffffff" stroke="#d1d5db"/>
+  <circle cx="40" cy="14" r="7.5" fill="#eb001b"/>
+  <circle cx="50" cy="14" r="7.5" fill="#f79e1b" fill-opacity="0.95"/>
+  <text x="45" y="24" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="6" font-weight="700" fill="#111111">mastercard</text>
+</svg>

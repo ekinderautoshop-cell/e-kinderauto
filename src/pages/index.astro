@@ -7,7 +7,6 @@ import ProductCard from '../components/ProductCard.astro';
 import { products as staticProducts } from '../data/products';
 import { getProductsFromD1, groupProductsByBase, isShortNameSingleWord, isErsatzteilProduct, isZusatzartikelProduct } from '../lib/d1-products';
 import { categoriesWithImages, getRandomProductImageFromCategory, getCategoryDisplayName, testimonials, ALLOWED_CATEGORY_NAMES } from '../data/shop-content';
-import NewsletterModal from '../components/NewsletterModal';
 import FaqSection from '../components/FaqSection';
 
 const db = Astro.locals.runtime?.env?.DB as import('../lib/d1-products').D1Database | undefined;
@@ -36,7 +35,6 @@ const homepageCategories = [...withImage].sort(() => Math.random() - 0.5).slice(
 
 <Layout title="E-Kinderauto - Premium Kinderfahrzeuge">
 	<Header />
-    <NewsletterModal client:idle />
 	<main>
         <!-- Hero Section -->
         <section class="relative h-[85vh] bg-gray-900 text-white overflow-hidden">
@@ -60,12 +58,6 @@ const homepageCategories = [...withImage].sort(() => Math.random() - 0.5).slice(
                 <div class="flex flex-col sm:flex-row gap-4">
                     <a href="#shop" class="bg-white text-black px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-gray-100 transition-colors inline-flex items-center justify-center">
                         Jetzt Shoppen
-                    </a>
-                    <a href="#video" class="border border-white text-white px-8 py-4 text-sm font-bold uppercase tracking-widest hover:bg-white/10 transition-colors inline-flex items-center justify-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4">
-                            <path fill-rule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653Z" clip-rule="evenodd" />
-                        </svg>
-                        Video ansehen
                     </a>
                 </div>
             </div>

@@ -3,7 +3,6 @@ export const prerender = false;
 
 import Layout from '../layouts/Layout.astro';
 import Header from '../components/Header.astro';
-import NewsletterModal from '../components/NewsletterModal';
 import { categoriesWithImages, getRandomProductImageFromCategory, ALLOWED_CATEGORY_NAMES, getCategoryDisplayName } from '../data/shop-content';
 import { products as staticProducts } from '../data/products';
 import { getProductsFromD1 } from '../lib/d1-products';
@@ -29,7 +28,6 @@ const categoriesWithBackgroundImages = categoriesWithImages.map((cat) => ({
 
 <Layout title="Kategorien - E-Kinderauto">
 	<Header />
-	<NewsletterModal client:idle />
 	<main class="bg-white pb-20">
 		<div class="bg-gray-50 py-12 md:py-20 mb-12 border-b border-gray-100">
 			<div class="container mx-auto px-6 md:px-12 text-center">

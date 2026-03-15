@@ -65,12 +65,11 @@ import { FORMSPARK_ACTION } from '../lib/formspark';
             <p class="text-xs text-gray-400">
                 &copy; {new Date().getFullYear()} E-Kinderauto. Alle Preise inkl. MwSt.
             </p>
-            <div class="flex gap-4 grayscale opacity-60">
-                <!-- Simple payment icons placeholders using text/emojis for now, usually SVGs -->
-                <span class="text-2xl" title="PayPal">🅿️</span>
-                <span class="text-2xl" title="Visa">💳</span>
-                <span class="text-2xl" title="Mastercard">💳</span>
-                <span class="text-2xl" title="Apple Pay">🍎</span>
+            <div class="flex flex-wrap items-center gap-2 opacity-90">
+                <img src="/payment-icons/paypal.svg" alt="PayPal" width="90" height="28" class="h-7 w-auto" loading="lazy" />
+                <img src="/payment-icons/klarna.svg" alt="Klarna" width="90" height="28" class="h-7 w-auto" loading="lazy" />
+                <img src="/payment-icons/visa.svg" alt="Visa" width="90" height="28" class="h-7 w-auto" loading="lazy" />
+                <img src="/payment-icons/mastercard.svg" alt="Mastercard" width="90" height="28" class="h-7 w-auto" loading="lazy" />
             </div>
         </div>
     </div>
