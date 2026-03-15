@@ -30,6 +30,8 @@ export const GET: APIRoute = async ({ locals, url }) => {
 		'/kategorien',
 		'/zusatzartikel',
 		'/kontakt',
+		'/checkout',
+		'/bestellung-erfolgreich',
 		'/impressum',
 		'/datenschutz',
 		'/agb',
@@ -37,11 +39,20 @@ export const GET: APIRoute = async ({ locals, url }) => {
 		'/unsere-geschichte',
 		'/nachhaltigkeit',
 		'/karriere',
+		'/anmelden',
+		'/registrieren',
+		'/passwort-vergessen',
+		'/status',
 	];
 
 	const categoryPages = categoriesWithImages.map((c) => c.url);
 	const allowedSet = new Set(ALLOWED_CATEGORY_NAMES);
-	const allRaw = db ? await getProductsFromD1(db) : staticProducts;
+	let allRaw = staticProducts;
+	try {
+		if (db) allRaw = await getProductsFromD1(db);
+	} catch (error) {
+		console.error('Sitemap fallback to static products:', error);
+	}
 	const productPages = allRaw
 		.filter(
 			(p) =>
