@@ -40,8 +40,10 @@ const homepageCategories = [...withImage].sort(() => Math.random() - 0.5).slice(
         <section class="relative h-[85vh] bg-gray-900 text-white overflow-hidden">
             <div class="absolute inset-0">
                 <img 
-                    src="https://images.unsplash.com/photo-1594787318286-3d835c1d207f?q=80&w=2070&auto=format&fit=crop" 
+                    src="/hero.webp" 
                     alt="Kind fährt Elektroauto" 
+                    loading="eager"
+                    fetchpriority="high"
                     class="w-full h-full object-cover opacity-60"
                 />
             </div>
