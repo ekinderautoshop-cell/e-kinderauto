@@ -200,10 +200,16 @@ export function getShortProductName(fullName: string, maxLength = 52): string {
 	return name;
 }
 
-/** True, wenn der Kurzname nur aus einem Wort besteht (solche Produkte sollen nicht angezeigt werden). */
+/**
+ * True, wenn der Roh-Name praktisch nur aus einem Wort besteht (oft Datenmüll-Zeilen).
+ * NICHT den Kurznamen von getShortProductName nutzen: Der ist absichtlich gekürzt und
+ * enthält bei „… „Huracan“ …“ oft nur ein Wort – dann würden echte Produkte fälschlich ausgeblendet.
+ */
 export function isShortNameSingleWord(fullName: string): boolean {
-	const short = getShortProductName(fullName).trim();
-	return short.length > 0 && short.split(/\s+/).length <= 1;
+	const raw = fullName.trim().replace(/^[\s\-–—:;,.|]+/, '').trim();
+	if (!raw) return true;
+	const words = raw.split(/\s+/).filter((w) => w.length > 0);
+	return words.length <= 1;
 }
 
 /** True, wenn der Produktname "ersatzteil" oder "ersatzteile" enthält (nicht anzeigen). */
