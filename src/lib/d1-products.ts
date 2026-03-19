@@ -1,4 +1,5 @@
 import type { Product } from '../types/product';
+import { normalizeCategoryFromD1Path } from '../data/shop-content';
 
 /** Zeile aus der D1-Tabelle `products` */
 export interface D1ProductRow {
@@ -65,7 +66,7 @@ export function mapD1RowToProduct(row: D1ProductRow): Product {
 		price: Math.round(price * 100) / 100,
 		image: mainImage,
 		images: allImages.length > 0 ? allImages : undefined,
-		category: row.category ?? '',
+		category: normalizeCategoryFromD1Path(row.category),
 		inStock,
 		shippingTime: row.shipping_time ?? undefined,
 		shippingCost,

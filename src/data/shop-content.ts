@@ -18,6 +18,24 @@ export const ALLOWED_CATEGORY_NAMES = [
     'E-Scooter Dezent',
 ] as const;
 
+/** Längere Namen zuerst – damit z. B. „Elektro Kinderfahrzeuge (mit Lizenz)“ vor „Kinderfahrzeuge“ matched. */
+const ALLOWED_CATEGORIES_LONGEST_FIRST: readonly string[] = [...ALLOWED_CATEGORY_NAMES].sort(
+	(a, b) => b.length - a.length
+);
+
+/**
+ * Mappt D1-/Lieferanten-Kategoriepfade (z. B. "Kinderfahrzeuge|…/Elektro Kinderfahrzeuge (mit Lizenz)")
+ * auf genau einen Eintrag aus ALLOWED_CATEGORY_NAMES. Ohne Treffer: "".
+ */
+export function normalizeCategoryFromD1Path(raw: string | null | undefined): string {
+	if (!raw?.trim()) return '';
+	const haystack = raw.trim();
+	for (const allowed of ALLOWED_CATEGORIES_LONGEST_FIRST) {
+		if (haystack.includes(allowed)) return allowed;
+	}
+	return '';
+}
+
 /** Reihenfolge der Kategorien (nur erlaubte aus der DB). */
 export const categoryOrder: { name: string; slug: string }[] = ALLOWED_CATEGORY_NAMES.map((name) => ({
     name,
